@@ -5,15 +5,23 @@
  *   #/history/<mode>?m=id1,id2   history skeleton with the given library entries composed in
  *                                (mode = 'acute' | 'chronic'; ?m is optional). Acute entries
  *                                are presenting complaints, chronic entries are conditions.
- *   #/exam                       physical examination (placeholder)
+ *   #/exam/<mode>?m=id           examination (one at a time, like chronic): mode = 'system'
+ *                                composes it into the head-to-toe skeleton; mode = 'focused'
+ *                                shows the focused examination's own pages
+ *   &s=<sectionId>               the section page to show (first section if absent)
  *
  * Data lives on the global CHE object (js/data/*). The selected modules live
- * in the URL, so any composed history can be bookmarked or shared.
+ * in the URL, so any composed history or examination can be bookmarked or shared.
  */
 (function () {
   'use strict';
 
-  const MODES = ['acute', 'chronic'];
+  // Each mode belongs to a top-level module (the main nav), with its own skeleton and library.
+  const MODES = { acute: 'history', chronic: 'history', system: 'exam', focused: 'exam' };
+  const DEFAULT_MODE = { history: 'acute', exam: 'system' };
+  // Modes whose library is "choose one": a chronic history reviews one condition, and an
+  // examination follows one system or body part. Acute histories can combine complaints.
+  const CHOOSE_ONE = { chronic: true, system: true, focused: true };
   const THEME_KEY = 'che.theme';
   const SLOT_LABELS = {
     pmh: 'PMHx',
@@ -79,16 +87,16 @@
   }
 
   // Links from an answer to other presenting complaints: a button that adds the
-  // module, or a check mark once it is already part of the history. In Chronic History
-  // they open the complaint in Acute History instead (a new or unexpected symptom).
+  // module, or a check mark once it is already part of the history. In other modes (Chronic
+  // History, examinations) they open the complaint in Acute History instead.
   function seeChips(see) {
     if (!see || !see.length) return '';
     const state = current();
     const selected = state.selected;
     return '<span class="see-list">' + see.filter(function (id) { return CHE.modules[id]; }).map(function (id) {
       const title = esc(CHE.modules[id].title);
-      if (state.modeId === 'chronic') {
-        return '<a class="see" href="' + historyHash('acute', [id]) + '" title="Take an acute history for this">Acute history: ' + title + ' →</a>';
+      if (state.modeId !== 'acute') {
+        return '<a class="see" href="' + pageHash('acute', [id]) + '" title="Take an acute history for this">Acute history: ' + title + ' →</a>';
       }
       return selected.indexOf(id) !== -1
         ? '<span class="see is-on">✓ ' + title + '</span>'
@@ -96,22 +104,51 @@
     }).join('') + '</span>';
   }
 
-  // Items are strings, or { text, dx, see, options } — a question, the conditions a
-  // positive answer points to, related presenting complaints, and possible responses.
+  // Hormones behind an examination finding: "↑ Cortisol" or "↓ Thyroid hormone".
+  function hormoneChips(hormones) {
+    if (!hormones || !hormones.length) return '';
+    return '<span class="hormone-list">' + hormones.map(function (h) {
+      const dir = h.charAt(0) === '↓' ? 'down' : 'up';
+      return '<span class="hormone hormone--' + dir + '" title="' + (dir === 'up' ? 'Elevated' : 'Lowered') + '">' +
+        '<span class="hormone__dir">' + esc(h.charAt(0)) + '</span>' + esc(h.slice(1).trim()) + '</span>';
+    }).join('') + '</span>';
+  }
+
+  // Items are strings, or { text, hormones, dx, see, options } — a question or finding, the
+  // hormones behind a finding, the conditions it points to, related presenting complaints,
+  // and possible responses.
   function list(items, cls, mod) {
     if (!items || !items.length) return '';
     return '<ul class="' + (cls || 'bullets') + '">' +
       items.map(function (item) {
         return typeof item === 'string'
           ? '<li>' + esc(item) + '</li>'
-          : '<li>' + esc(item.text) + dxChips(item.dx, mod) + seeChips(item.see) + list(item.options, 'options', mod) + '</li>';
+          : '<li>' + esc(item.text) + hormoneChips(item.hormones) + dxChips(item.dx, mod) + seeChips(item.see) +
+            list(item.options, 'options', mod) + '</li>';
       }).join('') + '</ul>';
   }
 
-  // Each mode has its own library: presenting complaints (acute) or chronic conditions.
+  // Each mode has its own library: presenting complaints (acute), chronic conditions, or
+  // examinations.
   function registry(modeId) {
-    return (modeId === 'chronic' ? CHE.conditions : CHE.modules) || {};
+    if (modeId === 'chronic') return CHE.conditions || {};
+    if (modeId === 'focused') return CHE.focused || {};
+    if (MODES[modeId] === 'exam') return CHE.exams || {};
+    return CHE.modules || {};
   }
+
+  // The skeleton for a mode: its sections and their general content.
+  function skeleton(modeId) {
+    return (MODES[modeId] === 'exam' ? CHE.exam : CHE.history)[modeId];
+  }
+
+  // Sections and frameworks the selected examination leaves out (`skip`). They keep their
+  // place and title, marked "(skipped)", so the full structure stays visible.
+  function isSkipped(id, active) {
+    return active.some(function (e) { return (e.mod.skip || []).indexOf(id) !== -1; });
+  }
+
+  const SKIPPED = ' <span class="skipped">(skipped)</span>';
 
   function libraryEntries(modeId) {
     const reg = registry(modeId);
@@ -165,23 +202,22 @@
     return {
       module: parts[0] || 'history',
       mode: parts[1],
-      // A chronic history reviews one condition; acute histories can combine complaints.
-      selected: parts[1] === 'chronic' ? selected.slice(0, 1) : selected,
+      selected: CHOOSE_ONE[parts[1]] ? selected.slice(0, 1) : selected,
       section: params.get('s') || null
     };
   }
 
-  // Each section of the history is its own page: ?s=<sectionId> (first section if absent).
-  function historyHash(modeId, selected, sectionId) {
+  // Each section is its own page: ?s=<sectionId> (first section if absent).
+  function pageHash(modeId, selected, sectionId) {
     const query = [];
     if (selected.length) query.push('m=' + selected.join(','));
     if (sectionId) query.push('s=' + sectionId);
-    return '#/history/' + modeId + (query.length ? '?' + query.join('&') : '');
+    return '#/' + MODES[modeId] + '/' + modeId + (query.length ? '?' + query.join('&') : '');
   }
 
-  // The section to show: the one named in the URL if it exists in this mode, else the first.
-  function currentSection(mode, sectionId) {
-    return mode.sections.filter(function (s) { return s.id === sectionId; })[0] || mode.sections[0];
+  // The section to show: the one named in the URL if it is shown in this mode, else the first.
+  function currentSection(sections, sectionId) {
+    return sections.filter(function (s) { return s.id === sectionId; })[0] || sections[0];
   }
 
   function current() {
@@ -192,12 +228,12 @@
   // Changing the selection keeps the reader on the same page.
   function setSelected(selected) {
     const state = current();
-    location.hash = historyHash(state.modeId, selected, state.section);
+    location.hash = pageHash(state.modeId, selected, state.section);
   }
 
   function goToSection(sectionId) {
     const state = current();
-    location.hash = historyHash(state.modeId, state.selected, sectionId);
+    location.hash = pageHash(state.modeId, state.selected, sectionId);
   }
 
   /* ---------- Block renderers (skeleton core content) ---------- */
@@ -257,6 +293,10 @@
     },
 
     framework: function (block, active) {
+      if (isSkipped(block.id, active)) {
+        const fw = CHE.frameworks[block.id] || {};
+        return '<div class="block"><div class="framework"><p class="framework__name">' + esc(fw.title || '') + SKIPPED + '</p></div></div>';
+      }
       return '<div class="block">' + renderFramework(block.id, null, null, conditionNotesHtml(block.id, active)) + '</div>';
     },
 
@@ -266,6 +306,23 @@
 
     redflags: function (block) {
       return renderCallout('redflag', block.title, list(block.items));
+    },
+
+    // Focused examination steps: technique, what to say, what to look for, what it means.
+    steps: function (block, active) {
+      const mod = active[0] && active[0].mod;
+      const part = function (label, html) {
+        return '<div class="step__part"><p class="step__label">' + label + '</p>' + html + '</div>';
+      };
+      return '<div class="block">' + blockTitle(block) + '<ol class="steps">' +
+        block.items.map(function (s) {
+          return '<li class="step"><p class="step__title">' + esc(s.title) + '</p>' +
+            part('How', '<p>' + esc(s.how) + '</p>') +
+            (s.say ? part('Say', '<blockquote class="step__say">' + esc(s.say) + '</blockquote>') : '') +
+            (s.lookFor ? part('Look for', '<p>' + esc(s.lookFor) + '</p>') : '') +
+            (s.findings ? part('What it means', list(s.findings, 'options', mod)) : '') +
+            '</li>';
+        }).join('') + '</ol></div>';
     }
   };
 
@@ -286,8 +343,8 @@
     return fn(block, active || []);
   }
 
-  // Questions the selected chronic condition adds under a skeleton framework's rows
-  // (`frameworkNotes`).
+  // What the selected library entry (a chronic condition or an examination) adds under a
+  // skeleton framework's rows (`frameworkNotes`).
   function conditionNotesHtml(fwId, active) {
     const extra = {};
     (active || []).forEach(function (e) {
@@ -404,10 +461,10 @@
       }).join('') + '</div></div>';
   }
 
-  // A chronic condition's own questions for this section.
-  function renderConditionSlot(section, active) {
+  // A chronic condition's or examination's own content for this section, apart from the rows.
+  function renderEntrySlot(section, active, modeId) {
     if (!active.length) {
-      return '<div class="slot-empty">Add a chronic condition from the library to bring in its questions.</div>';
+      return '<div class="slot-empty">' + esc(MODE_TEXT[modeId].emptySlot) + '</div>';
     }
     return active.map(function (e) {
       const blocks = (e.mod.sections || {})[section.id] || [];
@@ -417,12 +474,12 @@
     }).join('');
   }
 
-  function renderStageSlots(section, active) {
+  function renderStageSlots(section, active, modeId) {
     const slots = section.slots || [];
-    if (slots.indexOf('condition') !== -1) return renderConditionSlot(section, active);
+    if (slots.indexOf('condition') !== -1 || slots.indexOf('exam') !== -1) return renderEntrySlot(section, active, modeId);
     if (slots.indexOf('pc') !== -1) {
       if (!active.length) {
-        return '<div class="slot-empty">Add a presenting complaint from the library to bring in its questions.</div>';
+        return '<div class="slot-empty">' + esc(MODE_TEXT[modeId].emptySlot) + '</div>';
       }
       const activeIds = active.map(function (e) { return e.mod.id; });
       return '<div class="cards">' + active.map(function (e) { return renderPcCard(e, activeIds); }).join('') + '</div>';
@@ -432,25 +489,45 @@
 
   /* ---------- Views ---------- */
 
+  // Tabs for the modes of the current module (Acute / Chronic History, or the examinations).
   function renderModeTabs(activeModeId, selected) {
-    return '<div class="mode-tabs" role="tablist" aria-label="History type">' +
-      MODES.map(function (id) {
-        const mode = CHE.history[id];
+    return '<div class="mode-tabs" role="tablist" aria-label="Type">' +
+      Object.keys(MODES).filter(function (id) { return MODES[id] === MODES[activeModeId]; }).map(function (id) {
+        const mode = skeleton(id);
         if (!mode) return '';
         const active = id === activeModeId;
-        // The two modes have different libraries, so the selection doesn't carry across.
+        // Each mode has its own library, so the selection doesn't carry across.
         return '<a role="tab" class="mode-tab' + (active ? ' is-active' : '') + '"' +
-          ' aria-selected="' + active + '" href="' + historyHash(id, active ? selected : []) + '">' + esc(mode.title) + '</a>';
+          ' aria-selected="' + active + '" href="' + pageHash(id, active ? selected : []) + '">' + esc(mode.title) + '</a>';
       }).join('') + '</div>';
   }
 
-  const LIBRARY_TEXT = {
-    acute: { title: 'Presenting complaints', placeholder: 'Search, e.g. blood, colic, nocturia' },
-    chronic: { title: 'Chronic conditions', hint: 'Choose one', placeholder: 'Search, e.g. kidney, dialysis' }
+  const MODE_TEXT = {
+    acute: {
+      title: 'Presenting complaints', placeholder: 'Search, e.g. blood, colic, nocturia',
+      none: 'No presenting complaints', core: 'General questions', clear: 'Clear all',
+      emptySlot: 'Add a presenting complaint from the library to bring in its questions.'
+    },
+    chronic: {
+      title: 'Chronic conditions', hint: 'Choose one', placeholder: 'Search, e.g. kidney, dialysis',
+      none: 'No chronic condition', core: 'General questions', clear: 'Clear',
+      emptySlot: 'Add a chronic condition from the library to bring in its questions.'
+    },
+    system: {
+      title: 'Examinations', hint: 'Choose one', placeholder: 'Search, e.g. cardiovascular, abdomen',
+      none: 'No examination', core: 'General steps', clear: 'Clear', emptyLibrary: 'No examinations yet',
+      emptySlot: 'Add an examination from the library to bring in what to look for.'
+    },
+    focused: {
+      title: 'Focused examinations', hint: 'Choose one', placeholder: 'Search, e.g. thyroid, neck',
+      none: 'No focused examination', core: 'Steps', clear: 'Clear', emptyLibrary: 'No focused examinations yet',
+      emptyBar: 'Choose one from the library.',
+      emptySlot: 'Choose a focused examination from the library to see its steps.'
+    }
   };
 
   function renderLibrary(modeId) {
-    const text = LIBRARY_TEXT[modeId];
+    const text = MODE_TEXT[modeId];
     return '<div class="library">' +
       '<p class="library__title">' + esc(text.title) + '</p>' +
       (text.hint ? '<p class="library__hint">' + esc(text.hint) + '</p>' : '') +
@@ -502,13 +579,15 @@
         (libraryNote(m) ? '<span class="module__aka">' + esc(libraryNote(m)) + '</span>' : '') +
         '<span class="module__state" aria-hidden="true">' + (on ? '✓' : '+') + '</span>' +
         '</button></li>';
-    }).join('') : '<li class="module-list__empty">No matches</li>';
+    }).join('') : '<li class="module-list__empty">' +
+      esc(libraryEntries(state.modeId).length ? 'No matches' : MODE_TEXT[state.modeId].emptyLibrary || 'No matches') + '</li>';
   }
 
   function renderActiveBar(active, modeId) {
+    const text = MODE_TEXT[modeId];
     if (!active.length) {
-      return '<div class="active-bar is-empty">' + (modeId === 'chronic' ? 'No chronic condition' : 'No presenting complaints') +
-        ' selected. Showing the general questions.</div>';
+      return '<div class="active-bar is-empty">' + esc(text.none) + ' selected. ' +
+        esc(text.emptyBar || 'Showing the ' + text.core.toLowerCase() + '.') + '</div>';
     }
     return '<div class="active-bar">' +
       '<span class="active-bar__label">Composing:</span>' +
@@ -517,29 +596,29 @@
           '<button type="button" class="chip__x" data-action="remove" data-id="' + esc(e.mod.id) + '" aria-label="Remove ' +
           esc(e.mod.title) + '">×</button></span>';
       }).join('') +
-      '<button type="button" class="text-btn" data-action="clear">' + (modeId === 'chronic' ? 'Clear' : 'Clear all') + '</button>' +
+      '<button type="button" class="text-btn" data-action="clear">' + esc(text.clear) + '</button>' +
       '</div>';
   }
 
   // Page tabs: one per section, the current one highlighted.
-  function renderStageNav(mode, section) {
-    return '<nav class="stage-nav" aria-label="History sections"><ol>' +
-      mode.sections.map(function (s, i) {
+  function renderStageNav(sections, section, active) {
+    return '<nav class="stage-nav" aria-label="Sections"><ol>' +
+      sections.map(function (s, i) {
         const on = s.id === section.id;
         return '<li><button type="button" class="' + (on ? 'is-current' : '') + '" data-action="page" data-section="' + esc(s.id) + '"' +
           (on ? ' aria-current="page"' : '') + '>' +
-          '<span class="stage-nav__num">' + (i + 1) + '</span>' + esc(s.title) + '</button></li>';
+          '<span class="stage-nav__num">' + (i + 1) + '</span>' + esc(s.title) + (isSkipped(s.id, active) ? SKIPPED : '') + '</button></li>';
       }).join('') + '</ol></nav>';
   }
 
-  function renderPager(mode, section) {
-    const i = mode.sections.indexOf(section);
-    const prev = mode.sections[i - 1];
-    const next = mode.sections[i + 1];
+  function renderPager(sections, section, active) {
+    const i = sections.indexOf(section);
+    const prev = sections[i - 1];
+    const next = sections[i + 1];
     const link = function (s, n, dir) {
       return '<button type="button" class="pager__link pager__link--' + dir + '" data-action="page" data-section="' + esc(s.id) + '">' +
         '<small>' + (dir === 'prev' ? '← Previous' : 'Next →') + '</small>' +
-        '<span><span class="stage-nav__num">' + n + '</span> ' + esc(s.title) + '</span></button>';
+        '<span><span class="stage-nav__num">' + n + '</span> ' + esc(s.title) + (isSkipped(s.id, active) ? SKIPPED : '') + '</span></button>';
     };
     return '<nav class="pager" aria-label="Previous and next section">' +
       (prev ? link(prev, i, 'prev') : '<span></span>') +
@@ -547,19 +626,28 @@
       '</nav>';
   }
 
-  function renderStage(section, index, active) {
+  function renderStage(section, index, active, modeId) {
+    const skipped = isSkipped(section.id, active);
     return '<section class="stage" id="stage-' + esc(section.id) + '">' +
       '<header class="stage__head">' +
         '<span class="stage__num">' + (index + 1) + '</span>' +
-        '<div><h2 class="stage__title">' + esc(section.title) + '</h2>' +
+        '<div><h2 class="stage__title">' + esc(section.title) + (skipped ? SKIPPED : '') + '</h2>' +
         (section.summary ? '<p class="stage__summary">' + esc(section.summary) + '</p>' : '') +
         (section.ref ? '<p class="ref">Ref: ' + esc(section.ref) + '</p>' : '') +
         '</div>' +
       '</header>' +
-      '<details class="core" data-key="core-' + esc(section.id) + '" open><summary>General questions</summary>' +
-        section.core.map(function (b) { return renderBlock(b, active); }).join('') +
-      '</details>' +
-      renderStageSlots(section, active) +
+      (skipped
+        ? '<p class="slot-empty">' + esc(active[0].mod.title) + ' leaves this section out.</p></section>'
+        : renderStageBody(section, active, modeId));
+  }
+
+  function renderStageBody(section, active, modeId) {
+    return (section.core && section.core.length
+        ? '<details class="core" data-key="core-' + esc(section.id) + '" open><summary>' + esc(MODE_TEXT[modeId].core) + '</summary>' +
+          section.core.map(function (b) { return renderBlock(b, active); }).join('') +
+          '</details>'
+        : '') +
+      renderStageSlots(section, active, modeId) +
       '</section>';
   }
 
@@ -579,10 +667,13 @@
 
   // The shell (tabs, library) is built once per mode; selection changes only
   // re-render the flow, so the library keeps its scroll position and search focus.
-  function renderHistory(modeId, selected, sectionId) {
-    const mode = CHE.history[modeId];
+  // Used for both history taking and examination.
+  function renderGuide(modeId, selected, sectionId) {
+    const mode = skeleton(modeId);
     const active = resolveActive(modeId, selected);
-    const section = currentSection(mode, sectionId);
+    // A focused examination brings its own pages; otherwise the skeleton's sections.
+    const sections = mode.fromEntry && active.length ? active[0].mod.sections : mode.sections;
+    const section = currentSection(sections, sectionId);
 
     let shell = app.querySelector('.history');
     if (!shell || shell.dataset.mode !== modeId) {
@@ -601,12 +692,12 @@
     }
 
     shell.querySelector('.history__tabs').innerHTML = renderModeTabs(modeId, selected);
-    renderFlow(shell.querySelector('.flow'), mode, active, section);
+    renderFlow(shell.querySelector('.flow'), mode, sections, active, section);
     renderModuleList();
     document.title = section.title + ' · ' + mode.title + ' · Clinical History & Exam';
   }
 
-  function renderFlow(flow, mode, active, section) {
+  function renderFlow(flow, mode, sections, active, section) {
     const samePage = flow.dataset.section === section.id;
     flow.dataset.section = section.id;
 
@@ -623,9 +714,9 @@
 
     flow.innerHTML =
       // One sticky header: the complaint bar and the page tabs stay together.
-      '<div class="flow-head">' + renderActiveBar(active, mode.id) + renderStageNav(mode, section) + '</div>' +
-      renderStage(section, mode.sections.indexOf(section), active) +
-      renderPager(mode, section) +
+      '<div class="flow-head">' + renderActiveBar(active, mode.id) + renderStageNav(sections, section, active) + '</div>' +
+      renderStage(section, sections.indexOf(section), active, mode.id) +
+      renderPager(sections, section, active) +
       renderDifferentials(active);
 
     flow.querySelectorAll('details[data-key]').forEach(function (d) {
@@ -652,38 +743,25 @@
     }
   }
 
-  function renderExam() {
-    app.innerHTML =
-      '<div class="placeholder">' +
-        '<h2>Physical Examination</h2>' +
-        '<p>Coming soon.</p>' +
-        '<a class="xlink" href="#/history/acute">Go to History Taking <span aria-hidden="true">→</span></a>' +
-      '</div>';
-    document.title = 'Physical Examination · Clinical History & Exam';
-  }
-
   /* ---------- Router ---------- */
 
   function route() {
     const state = parseHash();
 
+    // An unknown module or mode goes to the module's default mode (History Taking if unknown).
+    if (MODES[state.mode] !== state.module) {
+      const fallback = DEFAULT_MODE[state.module] || DEFAULT_MODE.history;
+      return location.replace(pageHash(fallback, MODES[state.mode] ? [] : state.selected));
+    }
+
     document.querySelectorAll('.main-nav__link').forEach(function (a) {
       a.classList.toggle('is-active', a.dataset.module === state.module);
     });
 
-    if (state.module === 'exam') {
-      ui.lastMode = null;
-      return renderExam();
-    }
-
-    if (state.module !== 'history' || MODES.indexOf(state.mode) === -1) {
-      return location.replace(historyHash('acute', state.selected));
-    }
-
     // Keep scroll position when only the module selection changes.
     if (ui.lastMode !== state.mode) window.scrollTo(0, 0);
     ui.lastMode = state.mode;
-    renderHistory(state.mode, state.selected, state.section);
+    renderGuide(state.mode, state.selected, state.section);
   }
 
   /* ---------- Events ---------- */
@@ -696,8 +774,8 @@
 
     switch (el.dataset.action) {
       case 'toggle':
-        if (current().modeId === 'chronic') {
-          // Choose one: picking a condition replaces the current one.
+        if (CHOOSE_ONE[current().modeId]) {
+          // Choose one: picking an entry replaces the current one.
           setSelected(selected[0] === id ? [] : [id]);
           break;
         }
@@ -805,7 +883,7 @@
 
   /* ---------- Data sanity checks (dev aid) ---------- */
 
-  allModules().concat(libraryEntries('chronic')).forEach(function (m) {
+  allModules().concat(libraryEntries('chronic'), libraryEntries('system'), libraryEntries('focused')).forEach(function (m) {
     const refs = (m.related || []).slice();
     // Collect `see` links from every item, however deeply nested.
     (function walk(node) {
@@ -822,10 +900,13 @@
 
   // Every abbreviation in content must be in js/data/abbreviations.js (see CLAUDE.md).
   const abbrevs = CHE.abbreviations || {};
-  const contentText = JSON.stringify([CHE.history, CHE.modules, CHE.conditions, CHE.frameworks]);
+  const contentText = JSON.stringify([CHE.history, CHE.exam, CHE.modules, CHE.conditions, CHE.exams, CHE.focused, CHE.frameworks]);
   const missing = {};
+  // Names with two capitals that are not abbreviations (keep in step with validate.py).
+  const notAbbreviations = { McBurney: true };
   // A trailing "-1" style suffix is part of the abbreviation (e.g. GLP-1).
   (contentText.match(/\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b/g) || []).forEach(function (token) {
+    if (notAbbreviations[token]) return;
     const base = token.replace(/s$/, '');
     if (!abbrevs[token] && !abbrevs[base]) missing[token] = true;
   });

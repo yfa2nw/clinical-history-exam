@@ -22,10 +22,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 MODULE_DIR = ROOT / 'js' / 'data' / 'modules'
 CONDITION_DIR = ROOT / 'js' / 'data' / 'conditions'
-BLOCK_TYPES = {'list', 'groups', 'mnemonic', 'framework', 'callout', 'redflags'}
+EXAM_DIR = ROOT / 'js' / 'data' / 'exams'
+FOCUSED_DIR = ROOT / 'js' / 'data' / 'focused'
+BLOCK_TYPES = {'list', 'groups', 'mnemonic', 'framework', 'callout', 'redflags', 'steps'}
 
 # Same pattern as the check in js/app.js: two or more capitals, optional "-1" suffix (GLP-1).
 ABBR_RE = re.compile(r'\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b')
+# Names with two capitals that are not abbreviations (keep in step with js/app.js).
+NOT_ABBREVIATIONS = {'McBurney'}
 
 # Keys that hold ids or search terms rather than readable content.
 NON_CONTENT_KEYS = {'id', 'see', 'related', 'tags', 'framework', 'skip', 'key', 'letter'}
@@ -53,7 +57,7 @@ BRITISH = [
      r'is(e|ed|es|ing|ation|ations)\b', '-ize'),
     (r'\b\w*(travell|labell|modell|cancell|signall)\w*', 'single l (traveled, labeled)'),
     (r'\bprogramme\w*', 'program'),
-    (r'\bgrey\w*', 'gray'),
+    (r'\bgrey(?! Turner)\w*', 'gray'),  # not the Grey Turner sign (an eponym)
 ]
 
 # Canonical terms (CLAUDE.md). Search terms in `aka` are exempt.
@@ -123,7 +127,7 @@ const path = require('path');
 const warns = [];
 console.warn = (...a) => warns.push(a.join(' '));
 const files = JSON.parse(process.env.CHE_FILES);
-const owner = {}, conditionOwner = {};
+const owner = {}, conditionOwner = {}, examOwner = {}, focusedOwner = {};
 let current = null;
 const track = (fn, map) => function (m) { (map[m.id] = map[m.id] || []).push(current); fn(m); };
 for (const f of files) {
@@ -131,14 +135,16 @@ for (const f of files) {
   if (global.CHE && CHE.registerModule && !CHE.__wrapped) {
     CHE.registerModule = track(CHE.registerModule, owner);
     CHE.registerCondition = track(CHE.registerCondition, conditionOwner);
+    CHE.registerExam = track(CHE.registerExam, examOwner);
+    CHE.registerFocused = track(CHE.registerFocused, focusedOwner);
     CHE.__wrapped = true;
   }
   current = f;
   require(path.resolve(f));
 }
 process.stdout.write(JSON.stringify({
-  modules: CHE.modules, conditions: CHE.conditions || {}, frameworks: CHE.frameworks,
-  abbreviations: CHE.abbreviations, history: CHE.history, owner, conditionOwner, warns
+  modules: CHE.modules, conditions: CHE.conditions || {}, exams: CHE.exams || {}, focused: CHE.focused || {}, frameworks: CHE.frameworks,
+  abbreviations: CHE.abbreviations, history: CHE.history, exam: CHE.exam || {}, owner, conditionOwner, examOwner, focusedOwner, warns
 }));
 """
 
@@ -358,6 +364,99 @@ def check_conditions(report, data):
                 report.warn('Conditions', f'{cid}: Ongoing Symptoms has no "outside expectations" red flags linking to Acute History')
 
 
+def check_hormones(report, where, items):
+    """Hormones read "↑ Cortisol" or "↓ Thyroid hormone"."""
+    for item in walk_items(items):
+        for h in (item.get('hormones') or []) if isinstance(item, dict) else []:
+            if not re.match(r'^[↑↓] \S', h):
+                report.error('Hormones', f'{where}: "{h}" should start with "↑ " or "↓ "')
+
+
+def check_focused(report, data):
+    focused, owner, mods = data['focused'], data['focusedOwner'], data['modules']
+    for fid, files in owner.items():
+        if len(files) > 1:
+            report.error('Focused examinations', f'"{fid}" is registered in several files: {", ".join(files)}')
+    for path in sorted(FOCUSED_DIR.glob('*.js')) if FOCUSED_DIR.exists() else []:
+        rel = path.relative_to(ROOT).as_posix()
+        ids = [fid for fid, files in owner.items() if rel in files]
+        if len(ids) != 1:
+            report.error('Focused examinations', f'{rel} should register exactly one focused examination (found {len(ids)})')
+        elif ids[0] != path.stem:
+            report.warn('Focused examinations', f'{rel}: id "{ids[0]}" does not match the file name')
+    for fid, exam in focused.items():
+        for field in ('title', 'summary', 'tags', 'sections'):
+            if not exam.get(field):
+                report.error('Focused examinations', f'{fid}: missing {field}')
+        seen = set()
+        for sec in exam.get('sections') or []:
+            sid = sec.get('id')
+            if sid in seen:
+                report.error('Focused examinations', f'{fid}: duplicate section id "{sid}"')
+            seen.add(sid)
+            for field in ('id', 'title', 'summary', 'core'):
+                if not sec.get(field):
+                    report.error('Focused examinations', f'{fid} ({sid}): section missing {field}')
+            for b in sec.get('core') or []:
+                if b.get('type') not in BLOCK_TYPES:
+                    report.error('Focused examinations', f'{fid} ({sid}): unknown block type "{b.get("type")}"')
+                if b.get('type') == 'steps':
+                    for step in b.get('items') or []:
+                        for field in ('title', 'how'):
+                            if not step.get(field):
+                                report.error('Focused examinations', f'{fid} ({sid}): a step is missing {field}')
+                        check_hormones(report, f'{fid} ({sid}: {step.get("title")})', step.get('findings'))
+        for ref in all_see(exam):
+            if ref not in mods:
+                report.error('Links', f'{fid}: unknown presenting complaint "{ref}"')
+
+
+def check_exams(report, data):
+    exams, owner, mods, fws = data['exams'], data['examOwner'], data['modules'], data['frameworks']
+    section_ids, fw_ids = [], []
+    for mode in data['exam'].values():
+        for s in mode.get('sections', []):
+            section_ids.append(s['id'])
+            fw_ids += [b['id'] for b in s.get('core', []) if b.get('type') == 'framework']
+    for eid, files in owner.items():
+        if len(files) > 1:
+            report.error('Examinations', f'"{eid}" is registered in several files: {", ".join(files)}')
+    for path in sorted(EXAM_DIR.glob('*.js')) if EXAM_DIR.exists() else []:
+        rel = path.relative_to(ROOT).as_posix()
+        ids = [eid for eid, files in owner.items() if rel in files]
+        if len(ids) != 1:
+            report.error('Examinations', f'{rel} should register exactly one examination (found {len(ids)})')
+        elif ids[0] != path.stem:
+            report.warn('Examinations', f'{rel}: examination id "{ids[0]}" does not match the file name')
+    for eid, exam in exams.items():
+        for field in ('title', 'summary', 'tags'):
+            if not exam.get(field):
+                report.error('Examinations', f'{eid}: missing {field}')
+        if not exam.get('frameworkNotes') and not exam.get('sections'):
+            report.error('Examinations', f'{eid}: adds nothing (no frameworkNotes or sections)')
+        for sid, blocks in (exam.get('sections') or {}).items():
+            if sid not in section_ids:
+                report.error('Examinations', f'{eid}: "{sid}" is not an examination section')
+            for b in blocks:
+                if b.get('type') not in BLOCK_TYPES:
+                    report.error('Examinations', f'{eid} ({sid}): unknown block type "{b.get("type")}"')
+        for fw_id, notes in (exam.get('frameworkNotes') or {}).items():
+            if fw_id not in fw_ids:
+                report.error('Frameworks', f'{eid}: frameworkNotes for "{fw_id}", which is not an examination framework')
+                continue
+            keys = [r['key'] for r in fws[fw_id]['rows']]
+            for key, items in notes.items():
+                if key not in keys:
+                    report.error('Frameworks', f'{eid}: frameworkNotes "{key}" is not a row of {fw_id}')
+                check_hormones(report, f'{eid} ({fw_id}.{key})', items)
+        for sk in exam.get('skip') or []:
+            if sk not in section_ids and sk not in fw_ids:
+                report.error('Examinations', f'{eid}: skip "{sk}" is not an examination section or framework')
+        for ref in all_see(exam):
+            if ref not in mods:
+                report.error('Links', f'{eid}: unknown presenting complaint "{ref}"')
+
+
 def check_links(report, data):
     mods = data['modules']
     for mid, mod in mods.items():
@@ -405,11 +504,14 @@ def check_dx(report, data):
 
 def check_abbreviations(report, data):
     abbr = data['abbreviations']
-    content = [data['history'], data['modules'], data['conditions'], data['frameworks']]
+    content = [data['history'], data['exam'], data['modules'], data['conditions'], data['exams'], data['focused'],
+               data['frameworks']]
     text = json.dumps(content, ensure_ascii=False)
     used = set()
     missing = set()
     for tok in ABBR_RE.findall(text):
+        if tok in NOT_ABBREVIATIONS:
+            continue
         base = tok[:-1] if tok.endswith('s') else tok
         if tok in abbr:
             used.add(tok)
@@ -439,7 +541,18 @@ def check_abbreviations(report, data):
         for where, h in heads:
             for tok in ABBR_RE.findall(h):
                 report.warn('Headings', f'{mid} {where}: "{h}" uses the abbreviation {tok}')
-    for cid, cond in data['conditions'].items():
+    for fid, exam in data['focused'].items():
+        heads = [('title', exam['title'])]
+        for sec in exam.get('sections') or []:
+            heads.append((f'{sec.get("id")} title', sec.get('title') or ''))
+            for b in sec.get('core') or []:
+                heads += [(f'{sec.get("id")} heading', b.get('title') or '')]
+                heads += [(f'{sec.get("id")} step', st.get('title') or '') for st in b.get('items') or []
+                          if b.get('type') == 'steps']
+        for where, h in heads:
+            for tok in ABBR_RE.findall(h):
+                report.warn('Headings', f'{fid} {where}: "{h}" uses the abbreviation {tok}')
+    for cid, cond in list(data['conditions'].items()) + list(data['exams'].items()):
         heads = [('title', cond['title'])] + [
             (f'{sid} heading', t) for sid, blocks in (cond.get('sections') or {}).items() for b in blocks
             for t in [b.get('title') or ''] + [g.get('title') or '' for g in b.get('groups') or []] if t]
@@ -449,7 +562,8 @@ def check_abbreviations(report, data):
 
 
 def check_spelling_and_terms(report, data):
-    content = {'history': data['history'], 'modules': data['modules'], 'conditions': data['conditions'],
+    content = {'history': data['history'], 'exam': data['exam'], 'modules': data['modules'],
+               'conditions': data['conditions'], 'exams': data['exams'], 'focused': data['focused'],
                'frameworks': data['frameworks']}
     for path, s in walk_strings(content):
         in_aka = '.aka[' in path
@@ -527,6 +641,8 @@ def main():
     if data:
         check_modules(report, data)
         check_conditions(report, data)
+        check_exams(report, data)
+        check_focused(report, data)
         check_links(report, data)
         check_dx(report, data)
         check_abbreviations(report, data)
@@ -536,7 +652,10 @@ def main():
     n_err, n_warn = report.count('error'), report.count('warning')
     mods = len(data['modules']) if data else 0
     conds = len(data['conditions']) if data else 0
-    print(f'\n{mods} presenting complaints and {conds} chronic conditions checked: {n_err} errors, {n_warn} warnings')
+    exams = len(data['exams']) if data else 0
+    focused = len(data['focused']) if data else 0
+    print(f'\n{mods} presenting complaints, {conds} chronic conditions, {exams} system examinations and '
+          f'{focused} focused examinations checked: {n_err} errors, {n_warn} warnings')
     sys.exit(1 if n_err else 0)
 
 

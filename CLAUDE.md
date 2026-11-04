@@ -1,12 +1,16 @@
 # Clinical History & Exam
 
-Static site (no build step) for clinical history-taking and, later, physical examination. Primary reference: *Talley & O'Connor's Clinical Examination*.
+Static site (no build step) for clinical history-taking and physical examination. Primary reference: *Talley & O'Connor's Clinical Examination*.
 
 - `index.html`: page shell and script list (every new module file needs a `<script>` line here)
 - `js/data/core.js`: namespace, module registry, shared frameworks (e.g. SOCRATES), data format docs
 - `js/data/history-acute.js`, `js/data/history-chronic.js`: history skeletons (stages and general questions)
 - `js/data/modules/*.js`: presenting-complaint modules (the Acute History library), one per file
 - `js/data/conditions/*.js`: chronic conditions (the Chronic History library), one per file
+- `js/data/exam-system.js`: system examination skeleton (regions and their general steps)
+- `js/data/exams/*.js`: system examinations (the System Examination library), one per file
+- `js/data/exam-focused.js`: focused examination mode (holds only the page shown before one is chosen)
+- `js/data/focused/*.js`: focused examinations (the Focused Examination library), one per file
 - `js/app.js`: routing, composition and rendering
 - `js/data/abbreviations.js`: every abbreviation used in content
 - `css/styles.css`: styles
@@ -37,6 +41,21 @@ Static site (no build step) for clinical history-taking and, later, physical exa
 - Each chronic section is a framework (defined in `js/data/history-chronic.js`, keyed by section id; mnemonics: Diagnosis 5 Ws; Risk Factors SADPEDO for the modifiable rows; Presentation 3 Fs; Social Impact DEATH, SHAFT and wider impact). Procedures and surgery go under Complications > Hospitalizations, but treatment the patient is still on (dialysis, a stoma, a stent) goes under Management > Ongoing treatment; medication side effects go under Management, not Complications. A condition adds its questions under the matching rows with `frameworkNotes: { <section id>: { <rowKey>: [Item] } }`, the way features add answers to a shared SOCRATES, not as a separate card. Questions follow the same rules as presenting complaints (direct questions, abbreviations, American spelling, canonical terms).
 - Ongoing Symptoms: put what is expected for the condition under the `trend` row ("compare with usual"). Then add a `redflags` block in `sections: { 'ongoing-symptoms': [...] }` titled "Outside expectations: take an acute history": findings that are new, clearly worse or red flags, as "Finding: concern", each with `see: [moduleId]`. It stays a separate box so it stands out; in Chronic History its links open the presenting complaint in Acute History.
 - Condition titles stay spelled out ("Chronic kidney disease"); put the abbreviation in `aka`.
+
+### Physical examination
+
+- The System Examination skeleton (`js/data/exam-system.js`) runs general inspection, hands, arms, axillae, face, neck, chest, abdomen, then legs and ankles. Each region is a framework keyed by framework id: general inspection starts with WIPER, then the patient, then the surroundings; hands are nails, dorsal side, palmar side; arms mention pulse and BP briefly; the neck includes the lymph nodes. The chest has two IPA frameworks (`lungs`, `heart`) and the abdomen one (`abdomen`): I inspection, P palpation and percussion, A auscultation.
+- Exceptions to this head-to-toe order (e.g. a neurologic sensory and motor examination) get their own mode and skeleton later, not a forced fit.
+- An examination (`CHE.registerExam`, one per file in `js/data/exams/`) adds what to look for under the skeleton's rows with `frameworkNotes: { <framework id>: { <rowKey>: [Item] } }`, the way chronic conditions do. Content that stands apart goes in `sections: { <section id>: [Block] }`. Regions the examination leaves out go in `skip` (section or framework ids); they keep their title and place, marked "(skipped)", so the full structure stays visible. The examination library is "choose one", like the chronic library: choosing another examination replaces it.
+- Steps are clinician actions, written as imperatives ("Feel the radial pulse"), not questions. Findings are named as signs (clubbing, pitting edema, shifting dullness): signs belong here, not in history taking. Attach what a finding suggests as `dx` chips. When hormones drive a finding (endocrine), name them in `hormones: ['↑ Cortisol', '↓ Thyroid hormone']`, each starting with ↑ (elevated) or ↓ (lowered), using the same hormone names everywhere.
+- The other content rules apply: abbreviations (spelled-out headings, every abbreviation in the glossary), American spelling, canonical terms, consistent order.
+
+### Focused examinations
+
+- A focused examination (`CHE.registerFocused`, one per file in `js/data/focused/`) examines one body part in depth, e.g. the thyroid. Keep it to that part only: thyroid status and the rest of the body come from the system examinations, so point to them in "To complete the examination" rather than repeating them.
+- It brings its own pages (`sections: [{ id, title, summary, core }]`) instead of the head-to-toe skeleton, usually Preparation, then IPA (Inspection; Palpation and Percussion; Auscultation), then Special Tests. The last page ends with a `redflags` box titled "Outside expectations: take an acute history" ("Finding: concern", with `see` links that open the complaint in Acute History), then "To complete the examination" and a summary tip. The library is "choose one".
+- Each page uses a `steps` block. Each step has a `title`, `how` (the technique, as imperatives), `say` (what to say to the patient, word for word, without the quotation marks), `lookFor` (what to watch or feel for) and `findings` (what you might find, as signs, with `dx` chips for what each means and `hormones` where a hormone drives it).
+- Patient scripts are plain English, with no abbreviations ("Is that all right?", not "OK").
 
 ### Multi-system complaints
 

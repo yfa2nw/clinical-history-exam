@@ -105,7 +105,7 @@ p { margin: 0; }
 
 /* Small-caps label: the book's equivalent of an eyebrow */
 .library__title, .group__title, .framework__label, .slot__title, .callout__title,
-.core > summary, .active-bar__label, .framework__name, .abbr__count {
+.core > summary, .active-bar__label, .framework__name, .abbr__count, .step__label {
   font-variant-caps: normal;
   text-transform: uppercase;
   letter-spacing: .07em;
@@ -573,6 +573,15 @@ p { margin: 0; }
   color: var(--accent);
   border-bottom: 1px solid var(--border);
 }
+/* A section or framework the selected examination leaves out: title kept, marked "(skipped)" */
+.skipped {
+  font-size: .8em;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+}
 /* Group heading within a framework (e.g. Bleeding: Characteristics, Context) */
 .framework__group {
   margin-top: 14px;
@@ -754,6 +763,54 @@ p { margin: 0; }
   cursor: pointer;
 }
 .dx--link:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+/* Examinations: what a finding suggests is a tinted tag, so it stands apart from the finding. */
+.history[data-mode="system"] .dx, .history[data-mode="focused"] .dx {
+  margin-right: 4px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-style: italic;
+  white-space: normal;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.history[data-mode="system"] .dx::before, .history[data-mode="focused"] .dx::before { content: none; }
+
+/* Focused examination steps: numbered, each with How / Say / Look for / What it means */
+.steps { margin: 4px 0 18px; padding: 0; list-style: none; counter-reset: step; }
+.step { position: relative; padding: 12px 0 14px 48px; border-bottom: 1px solid var(--border); counter-increment: step; }
+.step::before {
+  content: counter(step);
+  position: absolute; left: 0; top: 12px; width: 32px;
+  font-size: 1.75rem; line-height: 1; font-weight: 600; text-align: center; color: var(--accent);
+}
+.step__title { font-size: 1.05rem; font-weight: 600; }
+.step__part { margin-top: 8px; }
+.step__label { font-size: 11.5px; color: var(--text-muted); }
+.step__say { margin: 2px 0 0; padding: 4px 12px; border-left: 3px solid var(--tip); background: var(--tip-soft); font-style: italic; }
+.step__say::before { content: "\201C"; }
+.step__say::after { content: "\201D"; }
+.step .options { margin-bottom: 0; }
+
+/* Hormones behind a finding: outlined, red for elevated, blue for lowered. */
+.hormone-list { display: inline; margin-left: 6px; }
+.hormone {
+  display: inline;
+  margin-right: 4px;
+  padding: 0 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hormone__dir { margin-right: 3px; font-size: 1.25em; line-height: 1; font-family: system-ui, sans-serif; }
+.hormone--up { color: var(--accent); }
+.hormone--down { color: var(--tip); }
+.hormone-list + .dx-list { margin-left: 0; }
 
 /* Links from an answer to another presenting complaint: "+ Urinary tract pain" */
 .see-list { display: inline; margin-left: 4px; }

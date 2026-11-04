@@ -4,8 +4,11 @@
  */
 window.CHE = window.CHE || {};
 CHE.history = CHE.history || {};
+CHE.exam = CHE.exam || {};
 CHE.modules = CHE.modules || {};
 CHE.conditions = CHE.conditions || {};
+CHE.exams = CHE.exams || {};
+CHE.focused = CHE.focused || {};
 
 /*
  * Register a presenting-complaint module. Module shape (all fields optional except id/title):
@@ -75,6 +78,53 @@ CHE.registerModule = function (mod) {
 CHE.registerCondition = function (cond) {
   if (CHE.conditions[cond.id]) console.warn('Duplicate condition id:', cond.id);
   CHE.conditions[cond.id] = cond;
+};
+
+/*
+ * Register a system examination (the Physical Examination library). The exam skeleton
+ * (exam-system.js) walks from general inspection to the legs; an examination adds what to
+ * look for at each step:
+ *
+ *   id, title, subtitle?, aka: [string], tags: [string], summary, ref
+ *   frameworkNotes: { <framework id>: { <rowKey>: [Item] } }
+ *     Findings added under the rows of each region's framework (e.g. hands.nails, or
+ *     lungs.auscultation for the IPA rows). Items are findings, with `dx` chips naming what
+ *     each finding suggests, and optionally `hormones: ['↑ Cortisol', '↓ Thyroid hormone']`:
+ *     the hormones behind it, each starting with ↑ (elevated) or ↓ (lowered).
+ *   sections: { <exam section id>: [Block] }
+ *     Content that stands apart from the rows (callouts, a list of extra steps).
+ *   skip: [section id | framework id]
+ *     Regions this examination leaves out (e.g. 'axilla', or 'heart' within the chest).
+ *     They keep their title and place, marked "(skipped)".
+ *
+ * The examination library is "choose one", like the chronic library.
+ */
+CHE.registerExam = function (exam) {
+  if (CHE.exams[exam.id]) console.warn('Duplicate examination id:', exam.id);
+  CHE.exams[exam.id] = exam;
+};
+
+/*
+ * Register a focused examination (the Focused Examination library): one body part examined
+ * in depth (e.g. the thyroid), with its own pages rather than the head-to-toe skeleton.
+ * Thyroid status and the rest of the body come from the system examinations.
+ *
+ *   id, title, subtitle?, aka: [string], tags: [string], summary, ref
+ *   sections: [{ id, title, summary, core: [Block] }]   the pages, in order
+ *
+ * Besides the usual blocks, a page uses { type: 'steps', items: [Step] }:
+ *   Step: { title, how, say?, lookFor?, findings?: [Item] }
+ *     how       the technique, as clinician actions (imperatives)
+ *     say       what to say to the patient, word for word
+ *     lookFor   what to watch or feel for
+ *     findings  what you might find, each with `dx` chips (what it means) and, where a
+ *               hormone drives it, `hormones: ['↑ Thyroid hormone']`
+ *
+ * The focused library is "choose one".
+ */
+CHE.registerFocused = function (exam) {
+  if (CHE.focused[exam.id]) console.warn('Duplicate focused examination id:', exam.id);
+  CHE.focused[exam.id] = exam;
 };
 
 /*
