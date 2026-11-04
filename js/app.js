@@ -2,8 +2,9 @@
  * App shell: hash routing, module composition and rendering.
  *
  * Routes:
- *   #/history/<mode>?m=id1,id2   history skeleton with the given modules composed in
- *                                (mode = 'acute' | 'chronic'; ?m is optional)
+ *   #/history/<mode>?m=id1,id2   history skeleton with the given library entries composed in
+ *                                (mode = 'acute' | 'chronic'; ?m is optional). Acute entries
+ *                                are presenting complaints, chronic entries are conditions.
  *   #/exam                       physical examination (placeholder)
  *
  * Data lives on the global CHE object (js/data/*). The selected modules live
@@ -78,12 +79,17 @@
   }
 
   // Links from an answer to other presenting complaints: a button that adds the
-  // module, or a check mark once it is already part of the history.
+  // module, or a check mark once it is already part of the history. In Chronic History
+  // they open the complaint in Acute History instead (a new or unexpected symptom).
   function seeChips(see) {
     if (!see || !see.length) return '';
-    const selected = current().selected;
+    const state = current();
+    const selected = state.selected;
     return '<span class="see-list">' + see.filter(function (id) { return CHE.modules[id]; }).map(function (id) {
       const title = esc(CHE.modules[id].title);
+      if (state.modeId === 'chronic') {
+        return '<a class="see" href="' + historyHash('acute', [id]) + '" title="Take an acute history for this">Acute history: ' + title + ' →</a>';
+      }
       return selected.indexOf(id) !== -1
         ? '<span class="see is-on">✓ ' + title + '</span>'
         : '<button type="button" class="see" data-action="add" data-id="' + esc(id) + '" title="Add this presenting complaint">+ ' + title + '</button>';
@@ -102,19 +108,29 @@
       }).join('') + '</ul>';
   }
 
-  function allModules() {
-    return Object.keys(CHE.modules).map(function (id) { return CHE.modules[id]; })
+  // Each mode has its own library: presenting complaints (acute) or chronic conditions.
+  function registry(modeId) {
+    return (modeId === 'chronic' ? CHE.conditions : CHE.modules) || {};
+  }
+
+  function libraryEntries(modeId) {
+    const reg = registry(modeId);
+    return Object.keys(reg).map(function (id) { return reg[id]; })
       .sort(function (a, b) { return a.title.localeCompare(b.title); });
   }
 
-  function allTags() {
+  function allModules() {
+    return libraryEntries('acute');
+  }
+
+  function allTags(modeId) {
     const tags = {};
-    allModules().forEach(function (m) { (m.tags || []).forEach(function (t) { tags[t] = true; }); });
+    libraryEntries(modeId).forEach(function (m) { (m.tags || []).forEach(function (t) { tags[t] = true; }); });
     return Object.keys(tags).sort();
   }
 
-  function resolveActive(selected) {
-    return selected.map(function (id) { return { mod: CHE.modules[id] }; });
+  function resolveActive(modeId, selected) {
+    return selected.map(function (id) { return { mod: registry(modeId)[id] }; });
   }
 
   // The content units of a module: the module itself, or each switched-on part.
@@ -142,12 +158,15 @@
     const parts = path.split('/').filter(Boolean);
     const params = new URLSearchParams(query);
     const m = params.get('m') || '';
+    const reg = registry(parts[1]);
+    const selected = m.split(',').filter(function (id, i, arr) {
+      return reg[id] && arr.indexOf(id) === i;
+    });
     return {
       module: parts[0] || 'history',
       mode: parts[1],
-      selected: m.split(',').filter(function (id, i, arr) {
-        return CHE.modules[id] && arr.indexOf(id) === i;
-      }),
+      // A chronic history reviews one condition; acute histories can combine complaints.
+      selected: parts[1] === 'chronic' ? selected.slice(0, 1) : selected,
       section: params.get('s') || null
     };
   }
@@ -194,7 +213,8 @@
     const fw = CHE.frameworks[id];
     if (!fw) return '';
     let group = null;
-    return '<div class="framework"><p class="framework__name">' + esc(fw.title) + '</p>' +
+    // Untitled frameworks (the chronic sections) are named by their section heading.
+    return '<div class="framework">' + (fw.title ? '<p class="framework__name">' + esc(fw.title) + '</p>' : '') +
       fw.rows.filter(function (row) { return !skip || skip.indexOf(row.key) === -1; }).map(function (row) {
         const rowNotes = notes && notes[row.key];
         // Rows may carry a `group`; a heading opens each new group.
@@ -236,12 +256,16 @@
         }).join('') + '</dl></div>';
     },
 
-    framework: function (block) {
-      return '<div class="block">' + renderFramework(block.id) + '</div>';
+    framework: function (block, active) {
+      return '<div class="block">' + renderFramework(block.id, null, null, conditionNotesHtml(block.id, active)) + '</div>';
     },
 
     callout: function (block) {
       return renderCallout(block.variant, block.title, '<p>' + esc(block.text) + '</p>');
+    },
+
+    redflags: function (block) {
+      return renderCallout('redflag', block.title, list(block.items));
     }
   };
 
@@ -252,13 +276,27 @@
       '<p class="callout__title">' + esc(title || labels[variant]) + '</p>' + bodyHtml + '</aside>';
   }
 
-  function renderBlock(block) {
+  // `active` (the selected library entries) lets skeleton frameworks take condition notes.
+  function renderBlock(block, active) {
     const fn = blockRenderers[block.type];
     if (!fn) {
       console.warn('Unknown block type:', block.type);
       return '';
     }
-    return fn(block);
+    return fn(block, active || []);
+  }
+
+  // Questions the selected chronic condition adds under a skeleton framework's rows
+  // (`frameworkNotes`).
+  function conditionNotesHtml(fwId, active) {
+    const extra = {};
+    (active || []).forEach(function (e) {
+      const notes = e.mod.frameworkNotes && e.mod.frameworkNotes[fwId];
+      Object.keys(notes || {}).forEach(function (key) {
+        extra[key] = (extra[key] || '') + list(notes[key], 'options', e.mod);
+      });
+    });
+    return extra;
   }
 
   /* ---------- Module renderers ---------- */
@@ -366,8 +404,22 @@
       }).join('') + '</div></div>';
   }
 
+  // A chronic condition's own questions for this section.
+  function renderConditionSlot(section, active) {
+    if (!active.length) {
+      return '<div class="slot-empty">Add a chronic condition from the library to bring in its questions.</div>';
+    }
+    return active.map(function (e) {
+      const blocks = (e.mod.sections || {})[section.id] || [];
+      if (!blocks.length) return '';
+      return '<section class="condition"><h4 class="condition__title">' + esc(e.mod.title) + '</h4>' +
+        blocks.map(function (b) { return renderBlock(b); }).join('') + '</section>';
+    }).join('');
+  }
+
   function renderStageSlots(section, active) {
     const slots = section.slots || [];
+    if (slots.indexOf('condition') !== -1) return renderConditionSlot(section, active);
     if (slots.indexOf('pc') !== -1) {
       if (!active.length) {
         return '<div class="slot-empty">Add a presenting complaint from the library to bring in its questions.</div>';
@@ -386,18 +438,26 @@
         const mode = CHE.history[id];
         if (!mode) return '';
         const active = id === activeModeId;
+        // The two modes have different libraries, so the selection doesn't carry across.
         return '<a role="tab" class="mode-tab' + (active ? ' is-active' : '') + '"' +
-          ' aria-selected="' + active + '" href="' + historyHash(id, selected) + '">' + esc(mode.title) + '</a>';
+          ' aria-selected="' + active + '" href="' + historyHash(id, active ? selected : []) + '">' + esc(mode.title) + '</a>';
       }).join('') + '</div>';
   }
 
-  function renderLibrary() {
+  const LIBRARY_TEXT = {
+    acute: { title: 'Presenting complaints', placeholder: 'Search, e.g. blood, colic, nocturia' },
+    chronic: { title: 'Chronic conditions', hint: 'Choose one', placeholder: 'Search, e.g. kidney, dialysis' }
+  };
+
+  function renderLibrary(modeId) {
+    const text = LIBRARY_TEXT[modeId];
     return '<div class="library">' +
-      '<p class="library__title">Presenting complaints</p>' +
-      '<input type="search" id="module-search" class="search" placeholder="Search, e.g. blood, colic, nocturia" ' +
-        'value="' + esc(ui.query) + '" aria-label="Search presenting complaints">' +
+      '<p class="library__title">' + esc(text.title) + '</p>' +
+      (text.hint ? '<p class="library__hint">' + esc(text.hint) + '</p>' : '') +
+      '<input type="search" id="module-search" class="search" placeholder="' + esc(text.placeholder) + '" ' +
+        'value="' + esc(ui.query) + '" aria-label="Search ' + esc(text.title.toLowerCase()) + '">' +
       '<div class="tag-filter" role="group" aria-label="Filter by tag">' +
-        ['all'].concat(allTags()).map(function (t) {
+        ['all'].concat(allTags(modeId)).map(function (t) {
           return '<button type="button" class="chip' + (ui.tag === t ? ' is-active' : '') + '" data-action="tag" data-tag="' +
             esc(t) + '">' + esc(t === 'all' ? 'All' : t) + '</button>';
         }).join('') +
@@ -423,10 +483,11 @@
   function renderModuleList() {
     const el = document.getElementById('module-list');
     if (!el) return;
-    const selected = current().selected;
+    const state = current();
+    const selected = state.selected;
     const q = ui.query.trim().toLowerCase();
 
-    const mods = allModules().filter(function (m) {
+    const mods = libraryEntries(state.modeId).filter(function (m) {
       if (ui.tag !== 'all' && (m.tags || []).indexOf(ui.tag) === -1) return false;
       if (!q) return true;
       const partTitles = (m.parts || []).map(function (p) { return p.title; });
@@ -444,9 +505,10 @@
     }).join('') : '<li class="module-list__empty">No matches</li>';
   }
 
-  function renderActiveBar(active) {
+  function renderActiveBar(active, modeId) {
     if (!active.length) {
-      return '<div class="active-bar is-empty">No presenting complaints selected. Showing the general questions.</div>';
+      return '<div class="active-bar is-empty">' + (modeId === 'chronic' ? 'No chronic condition' : 'No presenting complaints') +
+        ' selected. Showing the general questions.</div>';
     }
     return '<div class="active-bar">' +
       '<span class="active-bar__label">Composing:</span>' +
@@ -455,7 +517,7 @@
           '<button type="button" class="chip__x" data-action="remove" data-id="' + esc(e.mod.id) + '" aria-label="Remove ' +
           esc(e.mod.title) + '">×</button></span>';
       }).join('') +
-      '<button type="button" class="text-btn" data-action="clear">Clear all</button>' +
+      '<button type="button" class="text-btn" data-action="clear">' + (modeId === 'chronic' ? 'Clear' : 'Clear all') + '</button>' +
       '</div>';
   }
 
@@ -495,7 +557,7 @@
         '</div>' +
       '</header>' +
       '<details class="core" data-key="core-' + esc(section.id) + '" open><summary>General questions</summary>' +
-        section.core.map(renderBlock).join('') +
+        section.core.map(function (b) { return renderBlock(b, active); }).join('') +
       '</details>' +
       renderStageSlots(section, active) +
       '</section>';
@@ -519,17 +581,19 @@
   // re-render the flow, so the library keeps its scroll position and search focus.
   function renderHistory(modeId, selected, sectionId) {
     const mode = CHE.history[modeId];
-    const active = resolveActive(selected);
+    const active = resolveActive(modeId, selected);
     const section = currentSection(mode, sectionId);
 
     let shell = app.querySelector('.history');
     if (!shell || shell.dataset.mode !== modeId) {
+      // A tag filter from the other library may not exist in this one.
+      if (allTags(modeId).indexOf(ui.tag) === -1) ui.tag = 'all';
       app.innerHTML =
         '<div class="history" data-mode="' + esc(modeId) + '">' +
           '<div class="history__top"><div class="history__tabs"></div>' +
             '<p class="history__desc">' + esc(mode.description) + '</p></div>' +
           '<div class="layout">' +
-            '<aside class="sidebar">' + renderLibrary() + '</aside>' +
+            '<aside class="sidebar">' + renderLibrary(modeId) + '</aside>' +
             '<div class="flow"></div>' +
           '</div>' +
         '</div>';
@@ -559,7 +623,7 @@
 
     flow.innerHTML =
       // One sticky header: the complaint bar and the page tabs stay together.
-      '<div class="flow-head">' + renderActiveBar(active) + renderStageNav(mode, section) + '</div>' +
+      '<div class="flow-head">' + renderActiveBar(active, mode.id) + renderStageNav(mode, section) + '</div>' +
       renderStage(section, mode.sections.indexOf(section), active) +
       renderPager(mode, section) +
       renderDifferentials(active);
@@ -632,6 +696,11 @@
 
     switch (el.dataset.action) {
       case 'toggle':
+        if (current().modeId === 'chronic') {
+          // Choose one: picking a condition replaces the current one.
+          setSelected(selected[0] === id ? [] : [id]);
+          break;
+        }
         setSelected(selected.indexOf(id) === -1
           ? selected.concat(id)
           : selected.filter(function (s) { return s !== id; }));
@@ -736,7 +805,7 @@
 
   /* ---------- Data sanity checks (dev aid) ---------- */
 
-  allModules().forEach(function (m) {
+  allModules().concat(libraryEntries('chronic')).forEach(function (m) {
     const refs = (m.related || []).slice();
     // Collect `see` links from every item, however deeply nested.
     (function walk(node) {
@@ -753,7 +822,7 @@
 
   // Every abbreviation in content must be in js/data/abbreviations.js (see CLAUDE.md).
   const abbrevs = CHE.abbreviations || {};
-  const contentText = JSON.stringify([CHE.history, CHE.modules, CHE.frameworks]);
+  const contentText = JSON.stringify([CHE.history, CHE.modules, CHE.conditions, CHE.frameworks]);
   const missing = {};
   // A trailing "-1" style suffix is part of the abbreviation (e.g. GLP-1).
   (contentText.match(/\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b/g) || []).forEach(function (token) {

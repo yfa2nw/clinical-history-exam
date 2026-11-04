@@ -1,139 +1,170 @@
 /*
  * Chronic history skeleton. Same shape as history-acute.js.
- * Presenting-complaint modules flow into "Ongoing Symptoms".
+ * Each section's general questions are a framework (defined below, keyed by section id).
+ * Chronic conditions (js/data/conditions) add their own questions under its rows through
+ * `frameworkNotes`, the way features add answers to a shared SOCRATES. New or unexpected
+ * symptoms are taken as an acute history instead.
  */
+
+// One framework per chronic section. Rows with a `group` render under that heading.
+Object.assign(CHE.frameworks, {
+  diagnosis: {
+    id: 'diagnosis',
+    rows: [
+      { key: 'condition',     letter: '1', label: 'Condition',      prompt: 'What condition(s) have you been diagnosed with?' },
+      { key: 'when',          letter: '2', label: 'When and where', prompt: 'When, where and by whom was it diagnosed?' },
+      { key: 'cause',         letter: '3', label: 'Cause',          prompt: 'Do you know what caused it?' },
+      { key: 'stage',         letter: '4', label: 'Type and stage', prompt: 'Do you know the type, stage or severity?' },
+      { key: 'understanding', letter: '5', label: 'Understanding',  prompt: 'What do you understand about the condition?' }
+    ]
+  },
+
+  'risk-factors': {
+    id: 'risk-factors',
+    rows: [
+      { key: 'demographics', letter: '1', label: 'Demographics',       group: 'Non-modifiable', prompt: 'Age, sex, ethnicity (from demographics)' },
+      { key: 'family',       letter: '2', label: 'Family history',     group: 'Non-modifiable', prompt: 'Any family history of the condition?' },
+      { key: 'genetic',      letter: '3', label: 'Genetic',            group: 'Non-modifiable', prompt: 'Any known genetic or congenital conditions?' },
+      { key: 'substances',   letter: '4', label: 'Smoking and alcohol', group: 'Modifiable',    prompt: 'Do you smoke or drink alcohol?' },
+      { key: 'lifestyle',    letter: '5', label: 'Lifestyle',          group: 'Modifiable',     prompt: 'What are your diet, weight and physical activity like?' },
+      { key: 'exposures',    letter: '6', label: 'Exposures',          group: 'Modifiable',     prompt: 'Any relevant occupational, environmental or medication exposures?' },
+      { key: 'related',      letter: '7', label: 'Related conditions', group: 'Modifiable',     prompt: 'Any related conditions, e.g. HTN, DM, dyslipidemia?' }
+    ]
+  },
+
+  presentation: {
+    id: 'presentation',
+    rows: [
+      { key: 'first',    letter: '1', label: 'First symptoms', prompt: 'What were the first symptoms, and how long did you have them before diagnosis?' },
+      { key: 'how',      letter: '2', label: 'How found',      prompt: 'How was it picked up: symptoms, screening, an incidental finding or an emergency?' },
+      { key: 'admitted', letter: '3', label: 'Admission',      prompt: 'Were you admitted to the hospital when it was first diagnosed?' }
+    ]
+  },
+
+  investigations: {
+    id: 'investigations',
+    rows: [
+      { key: 'blood',      letter: '1', label: 'Blood tests',       group: 'At diagnosis',       prompt: 'Which blood tests were done?' },
+      { key: 'imaging',    letter: '2', label: 'Imaging',           group: 'At diagnosis',       prompt: 'Any imaging?' },
+      { key: 'biopsy',     letter: '3', label: 'Biopsy',            group: 'At diagnosis',       prompt: 'Any biopsy?' },
+      { key: 'functional', letter: '4', label: 'Functional tests',  group: 'At diagnosis',       prompt: 'Any functional tests (e.g. spirometry, echo, stress test)?' },
+      { key: 'monitoring', letter: '5', label: 'What is monitored', group: 'Ongoing monitoring', prompt: 'What is monitored, how often, and by whom?' },
+      { key: 'results',    letter: '6', label: 'Recent results',    group: 'Ongoing monitoring', prompt: 'What were the most recent results? Are they improving or worsening?' },
+      { key: 'home',       letter: '7', label: 'Home monitoring',   group: 'Ongoing monitoring', prompt: 'Do you monitor anything at home (e.g. BG, BP, peak flow, weight)?' }
+    ]
+  },
+
+  management: {
+    id: 'management',
+    rows: [
+      { key: 'lifestyle',    letter: '1',  label: 'Lifestyle changes',   group: 'Non-pharmacologic',     prompt: 'Have you made any lifestyle changes (diet, exercise, smoking cessation)?' },
+      { key: 'education',    letter: '2',  label: 'Education',           group: 'Non-pharmacologic',     prompt: 'Have you had education or a self-management plan?' },
+      { key: 'allied',       letter: '3',  label: 'Allied health',       group: 'Non-pharmacologic',     prompt: 'Do you see any allied health professionals?' },
+      { key: 'medications',  letter: '4',  label: 'Current medications', group: 'Pharmacologic',         prompt: 'What medications do you take for it, and at what doses?' },
+      { key: 'previous',     letter: '5',  label: 'Previous medications', group: 'Pharmacologic',        prompt: 'Which medications have you tried before? Why were they stopped?' },
+      { key: 'sideEffects',  letter: '6',  label: 'Side effects',        group: 'Pharmacologic',         prompt: 'Any side effects?' },
+      { key: 'sickDay',      letter: '7',  label: 'Sick day rules',      group: 'Pharmacologic',         prompt: 'Do you know which medications to pause or adjust when you are unwell with vomiting, diarrhea or fever?' },
+      { key: 'procedures',   letter: '8',  label: 'Procedures',          group: 'Procedural / surgical', prompt: 'Have you had any procedures or operations for it?' },
+      { key: 'missed',       letter: '9',  label: 'Missed doses',        group: 'Adherence',             prompt: 'How often do you miss a dose?' },
+      { key: 'barriers',     letter: '10', label: 'Barriers',            group: 'Adherence',             prompt: 'What makes it hard to take them (cost, side effects, complexity, beliefs)?' },
+      { key: 'aids',         letter: '11', label: 'Aids',                group: 'Adherence',             prompt: 'Do you use a pill organizer, blister pack or reminders?' },
+      { key: 'followUp',     letter: '12', label: 'Follow-up',           group: 'Adherence',             prompt: 'Do you attend your follow-up appointments?' }
+    ]
+  },
+
+  complications: {
+    id: 'complications',
+    rows: [
+      { key: 'disease',    letter: '1', label: 'Of the condition', prompt: 'Has the condition caused any complications (e.g. end-organ damage)?' },
+      { key: 'treatment',  letter: '2', label: 'Of treatment',     prompt: 'Any complications from treatment?' },
+      { key: 'admissions', letter: '3', label: 'Admissions',       prompt: 'Any recent hospital admissions? When, why, how long, any ICU stay?' },
+      { key: 'procedures', letter: '4', label: 'Procedures',       prompt: 'Any recent surgery or procedures?' },
+      { key: 'flares',     letter: '5', label: 'Flares',           prompt: 'Any flares or ED visits in the past 12 months?' }
+    ]
+  },
+
+  'ongoing-symptoms': {
+    id: 'ongoing-symptoms',
+    rows: [
+      { key: 'current', letter: '1', label: 'Current symptoms', prompt: 'What symptoms do you have now, compared with your usual?' },
+      { key: 'trend',   letter: '2', label: 'Trend',            prompt: 'Are things improving, stable or worsening?' },
+      { key: 'flares',  letter: '3', label: 'Flares',           prompt: 'How often do you have flares?' },
+      { key: 'new',     letter: '4', label: 'New symptoms',     prompt: 'Any new symptoms?' }
+    ]
+  },
+
+  'social-impact': {
+    id: 'social-impact',
+    rows: [
+      { key: 'dressing',      letter: 'D', label: 'Dressing',                 group: 'ADLs (DEATH)',  prompt: 'Do you need help getting dressed?' },
+      { key: 'eating',        letter: 'E', label: 'Eating',                   group: 'ADLs (DEATH)',  prompt: 'Do you need help eating?' },
+      { key: 'ambulating',    letter: 'A', label: 'Ambulating / transfers',   group: 'ADLs (DEATH)',  prompt: 'Can you walk, and get in and out of bed or a chair, on your own? Any walking aid or falls?' },
+      { key: 'toileting',     letter: 'T', label: 'Toileting / continence',   group: 'ADLs (DEATH)',  prompt: 'Can you manage the toilet on your own? Any incontinence?' },
+      { key: 'hygiene',       letter: 'H', label: 'Hygiene / bathing',        group: 'ADLs (DEATH)',  prompt: 'Can you wash and bathe yourself?' },
+      { key: 'shopping',      letter: 'S', label: 'Shopping',                 group: 'IADLs (SHAFT)', prompt: 'Can you do your own shopping?' },
+      { key: 'housekeeping',  letter: 'H', label: 'Housekeeping',             group: 'IADLs (SHAFT)', prompt: 'Can you manage the housework?' },
+      { key: 'accounting',    letter: 'A', label: 'Accounting / finances',    group: 'IADLs (SHAFT)', prompt: 'Can you manage your money and bills?' },
+      { key: 'food',          letter: 'F', label: 'Food preparation',         group: 'IADLs (SHAFT)', prompt: 'Can you prepare your own meals?' },
+      { key: 'transport',     letter: 'T', label: 'Transportation / driving', group: 'IADLs (SHAFT)', prompt: 'How do you get around? Do you drive?' },
+      { key: 'work',          letter: '1', label: 'Work or study',            group: 'Wider impact',  prompt: 'How has it affected your work or study?' },
+      { key: 'relationships', letter: '2', label: 'Relationships',            group: 'Wider impact',  prompt: 'How has it affected your relationships and your role in the family?' },
+      { key: 'mood',          letter: '3', label: 'Mood and coping',          group: 'Wider impact',  prompt: 'How is your mood? How are you coping?' },
+      { key: 'finances',      letter: '4', label: 'Finances',                 group: 'Wider impact',  prompt: 'Has it affected you financially?' },
+      { key: 'supports',      letter: '5', label: 'Supports',                 group: 'Wider impact',  prompt: 'Do you have caregivers, services, home modifications or aids?' },
+      { key: 'planning',      letter: '6', label: 'Advance care planning',    group: 'Wider impact',  prompt: 'Have you thought about advance care planning? (where appropriate)' },
+      { key: 'ice',           letter: '7', label: 'Ideas and concerns',       group: 'Wider impact',  prompt: 'What do you think about the condition, and what worries you? (ICE)' }
+    ]
+  }
+});
+
 CHE.history.chronic = {
   id: 'chronic',
   title: 'Chronic History',
-  description: 'For a known long-term condition. Follow the disease from diagnosis to its current effect on the patient\'s life. Add any current symptoms as modules.',
+  description: 'For a regular review of a known long-term condition. The diagnosis is clear, so follow the condition from diagnosis to its effect on the patient\'s life today. Choose the condition to review from the library.',
   sections: [
     {
       id: 'diagnosis',
       title: 'Diagnosis',
       summary: 'What the condition is, and how well the patient understands it.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'list',
-          items: [
-            'What condition(s) have you been diagnosed with?',
-            'When, where and by whom was it diagnosed?',
-            'Do you know the type, stage or severity?',
-            'What do you understand about the condition?'
-          ]
-        }
+        { type: 'framework', id: 'diagnosis' }
       ]
     },
     {
       id: 'risk-factors',
       title: 'Risk Factors',
       summary: 'What predisposed the patient to the condition, and what is still driving it.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'groups',
-          groups: [
-            {
-              title: 'Non-modifiable',
-              items: ['Age, sex, ethnicity (from demographics)', 'Any family history of the condition?', 'Any known genetic or congenital conditions?']
-            },
-            {
-              title: 'Modifiable',
-              items: [
-                'Do you smoke or drink alcohol?',
-                'What are your diet, weight and physical activity like?',
-                'Any relevant occupational or environmental exposures?',
-                'Any related conditions, e.g. HTN, DM, dyslipidemia?'
-              ]
-            }
-          ]
-        }
+        { type: 'framework', id: 'risk-factors' }
       ]
     },
     {
       id: 'presentation',
       title: 'Presentation at Diagnosis',
       summary: 'How the condition first came to attention.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'list',
-          items: [
-            'What were the first symptoms, and how long did you have them before diagnosis?',
-            {
-              text: 'How was it picked up?',
-              options: ['Symptoms', 'Screening', 'Incidental finding', 'Emergency presentation']
-            },
-            'Were you admitted to the hospital when it was first diagnosed?'
-          ]
-        }
+        { type: 'framework', id: 'presentation' }
       ]
     },
     {
       id: 'investigations',
       title: 'Investigations',
       summary: 'Tests done at diagnosis, and how the condition has been monitored since.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'groups',
-          groups: [
-            {
-              title: 'At diagnosis',
-              items: ['Which blood tests were done?', 'Any imaging?', 'Any biopsy?', 'Any functional tests (e.g. spirometry, echo, stress test)?']
-            },
-            {
-              title: 'Ongoing monitoring',
-              items: [
-                'What is monitored, how often, and by whom?',
-                'What were the most recent results? Are they improving or worsening?',
-                'Do you monitor anything at home (e.g. BG, BP, peak flow, weight)?'
-              ]
-            }
-          ]
-        }
+        { type: 'framework', id: 'investigations' }
       ]
     },
     {
       id: 'management',
       title: 'Management & Adherence',
       summary: 'Current and past treatment, who provides it, and how well the patient sticks to it.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'groups',
-          groups: [
-            {
-              title: 'Non-pharmacologic',
-              items: [
-                'Have you made any lifestyle changes (diet, exercise, smoking cessation)?',
-                'Have you had education or a self-management plan?',
-                'Do you see any allied health professionals?'
-              ]
-            },
-            {
-              title: 'Pharmacologic',
-              items: [
-                'What medications do you take for it, and at what doses?',
-                'Which medications have you tried before? Why were they stopped?',
-                'Any side effects?'
-              ]
-            },
-            {
-              title: 'Procedural / surgical',
-              items: ['Have you had any procedures or operations for it?']
-            },
-            {
-              title: 'Adherence',
-              items: [
-                'How often do you miss a dose?',
-                'What makes it hard to take them (cost, side effects, complexity, beliefs)?',
-                'Do you use a pill organizer, blister pack or reminders?',
-                'Do you attend your follow-up appointments?'
-              ]
-            }
-          ]
-        },
+        { type: 'framework', id: 'management' },
         {
           type: 'callout',
           variant: 'tip',
@@ -145,34 +176,23 @@ CHE.history.chronic = {
       id: 'complications',
       title: 'Complications',
       summary: 'Effects of the disease and its treatment, including recent admissions and surgery.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'list',
-          items: [
-            'Has the condition caused any complications (e.g. end-organ damage)?',
-            'Any complications from treatment?',
-            'Any recent hospital admissions? When, why, how long, any ICU stay?',
-            'Any recent surgery or procedures?',
-            'Any flares or ED visits in the past 12 months?'
-          ]
-        }
+        { type: 'framework', id: 'complications' }
       ]
     },
     {
       id: 'ongoing-symptoms',
       title: 'Ongoing Symptoms',
-      summary: 'How well controlled the condition is now. Explore each current symptom as you would an acute complaint.',
-      slots: ['pc'],
+      summary: 'How well controlled the condition is now. Compare current symptoms with what is expected for the condition and for this patient.',
+      slots: ['condition'],
       core: [
+        { type: 'framework', id: 'ongoing-symptoms' },
         {
-          type: 'list',
-          items: [
-            'What symptoms do you have now, compared with your usual?',
-            'Are things improving, stable or worsening?',
-            'How often do you have flares?',
-            'Any new symptoms?'
-          ]
+          type: 'callout',
+          variant: 'tip',
+          title: 'Outside expectations? Take an acute history',
+          text: 'If a symptom is new, clearly worse than usual, or a red flag, it falls outside what is expected for the patient\'s chronic condition. Take an acute history for it: the links under each condition open the matching presenting complaint in Acute History.'
         }
       ]
     },
@@ -180,31 +200,9 @@ CHE.history.chronic = {
       id: 'social-impact',
       title: 'Social Impact',
       summary: 'How the condition affects the patient\'s function, roles and wellbeing.',
-      slots: [],
+      slots: ['condition'],
       core: [
-        {
-          type: 'mnemonic',
-          title: 'ADLs (DEATH)',
-          letters: [['D', 'Dressing'], ['E', 'Eating'], ['A', 'Ambulating / transfers'], ['T', 'Toileting / continence'], ['H', 'Hygiene / bathing']]
-        },
-        {
-          type: 'mnemonic',
-          title: 'IADLs (SHAFT)',
-          letters: [['S', 'Shopping'], ['H', 'Housekeeping'], ['A', 'Accounting / finances'], ['F', 'Food preparation'], ['T', 'Transportation / driving']]
-        },
-        {
-          type: 'list',
-          title: 'Wider impact',
-          items: [
-            'How has it affected your work or study?',
-            'How has it affected your relationships and role in the family?',
-            'How is your mood? How are you coping?',
-            'Has it affected you financially?',
-            'Do you have caregivers, services, home modifications or aids?',
-            'Have you thought about advance care planning? (where appropriate)',
-            'What do you think about the condition, and what worries you? (ICE)'
-          ]
-        }
+        { type: 'framework', id: 'social-impact' }
       ]
     }
   ]

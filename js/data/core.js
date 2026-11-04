@@ -5,6 +5,7 @@
 window.CHE = window.CHE || {};
 CHE.history = CHE.history || {};
 CHE.modules = CHE.modules || {};
+CHE.conditions = CHE.conditions || {};
 
 /*
  * Register a presenting-complaint module. Module shape (all fields optional except id/title):
@@ -52,6 +53,28 @@ CHE.modules = CHE.modules || {};
 CHE.registerModule = function (mod) {
   if (CHE.modules[mod.id]) console.warn('Duplicate module id:', mod.id);
   CHE.modules[mod.id] = mod;
+};
+
+/*
+ * Register a chronic condition (the Chronic History library). The diagnosis is already
+ * known, so a condition adds its own questions to each section of the chronic skeleton:
+ *
+ *   id, title, subtitle?, aka: [string], tags: [string], summary, ref
+ *   sections: { <chronic section id>: [Block] }
+ *     Blocks as in the history skeletons: { type: 'list', title?, items: [Item] },
+ *     { type: 'groups', groups: [{ title, items }] }, { type: 'callout', variant, title?, text },
+ *     or { type: 'redflags', title?, items: [Item] }.
+ *     In 'ongoing-symptoms', list what is expected for the condition, then the findings
+ *     that fall outside it, each with `see: [moduleId]`: in Chronic History these render
+ *     as links that open that presenting complaint in Acute History.
+ *   frameworkNotes: { <section id>: { <rowKey>: [Item] } }
+ *     Questions added under the rows of each chronic section's framework (defined in
+ *     history-chronic.js), the way features add answers to a shared SOCRATES. Use `sections`
+ *     only for content that stands apart, like the Ongoing Symptoms red flags.
+ */
+CHE.registerCondition = function (cond) {
+  if (CHE.conditions[cond.id]) console.warn('Duplicate condition id:', cond.id);
+  CHE.conditions[cond.id] = cond;
 };
 
 /*

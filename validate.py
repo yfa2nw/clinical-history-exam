@@ -21,6 +21,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 MODULE_DIR = ROOT / 'js' / 'data' / 'modules'
+CONDITION_DIR = ROOT / 'js' / 'data' / 'conditions'
+BLOCK_TYPES = {'list', 'groups', 'mnemonic', 'framework', 'callout', 'redflags'}
 
 # Same pattern as the check in js/app.js: two or more capitals, optional "-1" suffix (GLP-1).
 ABBR_RE = re.compile(r'\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b')
@@ -121,21 +123,22 @@ const path = require('path');
 const warns = [];
 console.warn = (...a) => warns.push(a.join(' '));
 const files = JSON.parse(process.env.CHE_FILES);
-const owner = {};
+const owner = {}, conditionOwner = {};
 let current = null;
+const track = (fn, map) => function (m) { (map[m.id] = map[m.id] || []).push(current); fn(m); };
 for (const f of files) {
-  // Wrap registerModule once core.js has defined it, to record each module's file.
+  // Wrap the register functions once core.js has defined them, to record each entry's file.
   if (global.CHE && CHE.registerModule && !CHE.__wrapped) {
-    const orig = CHE.registerModule;
-    CHE.registerModule = function (m) { (owner[m.id] = owner[m.id] || []).push(current); orig(m); };
+    CHE.registerModule = track(CHE.registerModule, owner);
+    CHE.registerCondition = track(CHE.registerCondition, conditionOwner);
     CHE.__wrapped = true;
   }
   current = f;
   require(path.resolve(f));
 }
 process.stdout.write(JSON.stringify({
-  modules: CHE.modules, frameworks: CHE.frameworks, abbreviations: CHE.abbreviations,
-  history: CHE.history, owner, warns
+  modules: CHE.modules, conditions: CHE.conditions || {}, frameworks: CHE.frameworks,
+  abbreviations: CHE.abbreviations, history: CHE.history, owner, conditionOwner, warns
 }));
 """
 
@@ -295,6 +298,66 @@ def check_modules(report, data):
                     report.error('Frameworks', f'{fid}: a row is missing {field}')
 
 
+def check_conditions(report, data):
+    conds, owner, mods = data['conditions'], data['conditionOwner'], data['modules']
+    section_ids = [s['id'] for s in data['history'].get('chronic', {}).get('sections', [])]
+    for cid, files in owner.items():
+        if len(files) > 1:
+            report.error('Conditions', f'"{cid}" is registered in several files: {", ".join(files)}')
+    for path in sorted(CONDITION_DIR.glob('*.js')) if CONDITION_DIR.exists() else []:
+        rel = path.relative_to(ROOT).as_posix()
+        ids = [cid for cid, files in owner.items() if rel in files]
+        if len(ids) != 1:
+            report.error('Conditions', f'{rel} should register exactly one condition (found {len(ids)})')
+        elif ids[0] != path.stem:
+            report.warn('Conditions', f'{rel}: condition id "{ids[0]}" does not match the file name')
+    for cid, cond in conds.items():
+        for field in ('title', 'summary', 'tags', 'sections'):
+            if not cond.get(field):
+                report.error('Conditions', f'{cid}: missing {field}')
+        for sid, blocks in (cond.get('sections') or {}).items():
+            where = f'{cid} ({sid})'
+            if sid not in section_ids:
+                report.error('Conditions', f'{where}: "{sid}" is not a chronic history section')
+            for b in blocks:
+                if b.get('type') not in BLOCK_TYPES:
+                    report.error('Conditions', f'{where}: unknown block type "{b.get("type")}"')
+                items = list(b.get('items') or []) + [i for g in b.get('groups') or [] for i in g.get('items') or []]
+                for item in items:
+                    t = text_of(item)
+                    # Questions to the patient; red flags are "Finding: concern" instead.
+                    if b.get('type') == 'redflags':
+                        if ': ' not in t:
+                            report.warn('Red flags', f'{where}: "{t}" is not "Finding: concern"')
+                    elif not is_question(t):
+                        report.warn('Question style', f'{where}: "{t}" is not a question')
+                for ref in all_see(blocks):
+                    if ref not in mods:
+                        report.error('Links', f'{where}: unknown presenting complaint "{ref}"')
+        fws = data['frameworks']
+        for fw_id, notes in (cond.get('frameworkNotes') or {}).items():
+            if fw_id not in fws:
+                report.error('Frameworks', f'{cid}: frameworkNotes for unknown framework "{fw_id}"')
+                continue
+            keys = [r['key'] for r in fws[fw_id]['rows']]
+            for key, items in notes.items():
+                if key not in keys:
+                    report.error('Frameworks', f'{cid}: frameworkNotes "{key}" is not a row of {fw_id}')
+                for item in items:
+                    if not is_question(text_of(item)):
+                        report.warn('Question style', f'{cid} ({fw_id}.{key}): "{text_of(item)}" is not a question')
+                for ref in all_see(items):
+                    if ref not in mods:
+                        report.error('Links', f'{cid} ({fw_id}.{key}): unknown presenting complaint "{ref}"')
+        if cid in section_ids or cid in mods:
+            report.warn('Conditions', f'{cid}: id is also used by a presenting complaint or section')
+    if conds and 'ongoing-symptoms' in section_ids:
+        for cid, cond in conds.items():
+            blocks = (cond.get('sections') or {}).get('ongoing-symptoms') or []
+            if not any(b.get('type') == 'redflags' for b in blocks):
+                report.warn('Conditions', f'{cid}: Ongoing Symptoms has no "outside expectations" red flags linking to Acute History')
+
+
 def check_links(report, data):
     mods = data['modules']
     for mid, mod in mods.items():
@@ -342,7 +405,7 @@ def check_dx(report, data):
 
 def check_abbreviations(report, data):
     abbr = data['abbreviations']
-    content = [data['history'], data['modules'], data['frameworks']]
+    content = [data['history'], data['modules'], data['conditions'], data['frameworks']]
     text = json.dumps(content, ensure_ascii=False)
     used = set()
     missing = set()
@@ -376,10 +439,18 @@ def check_abbreviations(report, data):
         for where, h in heads:
             for tok in ABBR_RE.findall(h):
                 report.warn('Headings', f'{mid} {where}: "{h}" uses the abbreviation {tok}')
+    for cid, cond in data['conditions'].items():
+        heads = [('title', cond['title'])] + [
+            (f'{sid} heading', t) for sid, blocks in (cond.get('sections') or {}).items() for b in blocks
+            for t in [b.get('title') or ''] + [g.get('title') or '' for g in b.get('groups') or []] if t]
+        for where, h in heads:
+            for tok in ABBR_RE.findall(h):
+                report.warn('Headings', f'{cid} {where}: "{h}" uses the abbreviation {tok}')
 
 
 def check_spelling_and_terms(report, data):
-    content = {'history': data['history'], 'modules': data['modules'], 'frameworks': data['frameworks']}
+    content = {'history': data['history'], 'modules': data['modules'], 'conditions': data['conditions'],
+               'frameworks': data['frameworks']}
     for path, s in walk_strings(content):
         in_aka = '.aka[' in path
         if not in_aka:
@@ -455,6 +526,7 @@ def main():
     data = load_data(report, scripts)
     if data:
         check_modules(report, data)
+        check_conditions(report, data)
         check_links(report, data)
         check_dx(report, data)
         check_abbreviations(report, data)
@@ -463,7 +535,8 @@ def main():
     report.print(errors_only)
     n_err, n_warn = report.count('error'), report.count('warning')
     mods = len(data['modules']) if data else 0
-    print(f'\n{mods} modules checked: {n_err} errors, {n_warn} warnings')
+    conds = len(data['conditions']) if data else 0
+    print(f'\n{mods} presenting complaints and {conds} chronic conditions checked: {n_err} errors, {n_warn} warnings')
     sys.exit(1 if n_err else 0)
 
 
