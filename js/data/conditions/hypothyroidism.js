@@ -68,7 +68,10 @@ CHE.registerCondition({
         'Do you take calcium, iron, PPIs or soy at the same time? (reduce absorption)'
       ],
       previous: ['Have you tried liothyronine or other thyroid preparations?'],
-      sideEffects: ['Any palpitations, tremor, anxiety, weight loss or poor sleep? (over-replacement)'],
+      sideEffects: [
+        'Any palpitations, tremor, anxiety, weight loss or poor sleep? (over-replacement)',
+        'Any AF or bone thinning from too high a dose?'
+      ],
       missed: ['Do you take it every day? If you miss a dose, do you know you can take it later or double up the next day?'],
       followUp: ['Do you have your TSH checked 6 weeks after each dose change?']
     },
@@ -77,11 +80,10 @@ CHE.registerCondition({
         'Any high cholesterol?',
         'Any infertility or miscarriage?',
         'Any goiter causing pressure symptoms?'
-      ],
-      treatment: ['Any AF or bone thinning from too high a dose?']
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -89,9 +91,9 @@ CHE.registerCondition({
             'Mild fatigue',
             'Mild dry skin or constipation'
           ]
-        }
-      ],
-      trend: ['Do your symptoms change as your dose or TSH changes?']
+        },
+        'Do your symptoms change as your dose or TSH changes?'
+      ]
     },
     'social-impact': {
       work: ['Has fatigue affected your work or study?'],

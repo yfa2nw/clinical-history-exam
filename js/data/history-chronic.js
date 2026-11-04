@@ -11,11 +11,11 @@ Object.assign(CHE.frameworks, {
   diagnosis: {
     id: 'diagnosis',
     rows: [
-      { key: 'condition',     letter: '1', label: 'Condition',      prompt: 'What condition(s) have you been diagnosed with?' },
-      { key: 'when',          letter: '2', label: 'When and where', prompt: 'When, where and by whom was it diagnosed?' },
-      { key: 'cause',         letter: '3', label: 'Cause',          prompt: 'Do you know what caused it?' },
-      { key: 'stage',         letter: '4', label: 'Type and stage', prompt: 'Do you know the type, stage or severity?' },
-      { key: 'understanding', letter: '5', label: 'Understanding',  prompt: 'What do you understand about the condition?' }
+      { key: 'condition',     letter: 'W', label: 'What',                 group: '5 Ws', prompt: 'What condition(s) have you been diagnosed with?' },
+      { key: 'when',          letter: 'W', label: 'When and where',       group: '5 Ws', prompt: 'When, where and by whom was it diagnosed?' },
+      { key: 'cause',         letter: 'W', label: 'Why (cause)',          group: '5 Ws', prompt: 'Do you know what caused it?' },
+      { key: 'stage',         letter: 'W', label: 'Which type or stage',  group: '5 Ws', prompt: 'Do you know the type, stage or severity?' },
+      { key: 'understanding', letter: 'W', label: 'What they understand', group: '5 Ws', prompt: 'What do you understand about the condition?' }
     ]
   },
 
@@ -25,19 +25,22 @@ Object.assign(CHE.frameworks, {
       { key: 'demographics', letter: '1', label: 'Demographics',       group: 'Non-modifiable', prompt: 'Age, sex, ethnicity (from demographics)' },
       { key: 'family',       letter: '2', label: 'Family history',     group: 'Non-modifiable', prompt: 'Any family history of the condition?' },
       { key: 'genetic',      letter: '3', label: 'Genetic',            group: 'Non-modifiable', prompt: 'Any known genetic or congenital conditions?' },
-      { key: 'substances',   letter: '4', label: 'Smoking and alcohol', group: 'Modifiable',    prompt: 'Do you smoke or drink alcohol?' },
-      { key: 'lifestyle',    letter: '5', label: 'Lifestyle',          group: 'Modifiable',     prompt: 'What are your diet, weight and physical activity like?' },
-      { key: 'exposures',    letter: '6', label: 'Exposures',          group: 'Modifiable',     prompt: 'Any relevant occupational, environmental or medication exposures?' },
-      { key: 'related',      letter: '7', label: 'Related conditions', group: 'Modifiable',     prompt: 'Any related conditions, e.g. HTN, DM, dyslipidemia?' }
+      { key: 'smoking',      letter: 'S', label: 'Smoking',                group: 'Modifiable (SADPEDO)', prompt: 'Do you smoke? How much, and for how long?' },
+      { key: 'alcohol',      letter: 'A', label: 'Alcohol',                group: 'Modifiable (SADPEDO)', prompt: 'How much alcohol do you drink in a typical week?' },
+      { key: 'drugs',        letter: 'D', label: 'Drugs',                  group: 'Modifiable (SADPEDO)', prompt: 'Do you use any recreational drugs?' },
+      { key: 'activity',     letter: 'P', label: 'Physical activity',      group: 'Modifiable (SADPEDO)', prompt: 'How active are you?' },
+      { key: 'exposures',    letter: 'E', label: 'Exposures',              group: 'Modifiable (SADPEDO)', prompt: 'Any relevant occupational, environmental or medication exposures?' },
+      { key: 'diet',         letter: 'D', label: 'Diet',                   group: 'Modifiable (SADPEDO)', prompt: 'What is your diet like? Has your weight changed?' },
+      { key: 'related',      letter: 'O', label: 'Others (comorbidities)', group: 'Modifiable (SADPEDO)', prompt: 'Any related conditions, e.g. HTN, DM, dyslipidemia?' }
     ]
   },
 
   presentation: {
     id: 'presentation',
     rows: [
-      { key: 'first',    letter: '1', label: 'First symptoms', prompt: 'What were the first symptoms, and how long did you have them before diagnosis?' },
-      { key: 'how',      letter: '2', label: 'How found',      prompt: 'How was it picked up: symptoms, screening, an incidental finding or an emergency?' },
-      { key: 'admitted', letter: '3', label: 'Admission',      prompt: 'Were you admitted to the hospital when it was first diagnosed?' }
+      { key: 'first',    letter: 'F', label: 'First symptoms',       group: '3 Fs', prompt: 'What were the first symptoms, and how long did you have them before diagnosis?' },
+      { key: 'how',      letter: 'F', label: 'Found',                group: '3 Fs', prompt: 'How was it picked up: symptoms, screening, an incidental finding or an emergency?' },
+      { key: 'admitted', letter: 'F', label: 'Facility (admission)', group: '3 Fs', prompt: 'Were you admitted to the hospital when it was first diagnosed?' }
     ]
   },
 
@@ -60,11 +63,11 @@ Object.assign(CHE.frameworks, {
       { key: 'lifestyle',    letter: '1',  label: 'Lifestyle changes',   group: 'Non-pharmacologic',     prompt: 'Have you made any lifestyle changes (diet, exercise, smoking cessation)?' },
       { key: 'education',    letter: '2',  label: 'Education',           group: 'Non-pharmacologic',     prompt: 'Have you had education or a self-management plan?' },
       { key: 'allied',       letter: '3',  label: 'Allied health',       group: 'Non-pharmacologic',     prompt: 'Do you see any allied health professionals?' },
-      { key: 'medications',  letter: '4',  label: 'Current medications', group: 'Pharmacologic',         prompt: 'What medications do you take for it, and at what doses?' },
-      { key: 'previous',     letter: '5',  label: 'Previous medications', group: 'Pharmacologic',        prompt: 'Which medications have you tried before? Why were they stopped?' },
-      { key: 'sideEffects',  letter: '6',  label: 'Side effects',        group: 'Pharmacologic',         prompt: 'Any side effects?' },
-      { key: 'sickDay',      letter: '7',  label: 'Sick day rules',      group: 'Pharmacologic',         prompt: 'Do you know which medications to pause or adjust when you are unwell with vomiting, diarrhea or fever?' },
-      { key: 'procedures',   letter: '8',  label: 'Procedures',          group: 'Procedural / surgical', prompt: 'Have you had any procedures or operations for it?' },
+      { key: 'ongoing',      letter: '4',  label: 'Ongoing treatment',   group: 'Non-pharmacologic',     prompt: 'Any ongoing treatment besides medications (e.g. dialysis, a stoma, a stent or a device)?' },
+      { key: 'medications',  letter: '5',  label: 'Current medications', group: 'Pharmacologic',         prompt: 'What medications do you take for it, and at what doses?' },
+      { key: 'previous',     letter: '6',  label: 'Previous medications', group: 'Pharmacologic',        prompt: 'Which medications have you tried before? Why were they stopped?' },
+      { key: 'sideEffects',  letter: '7',  label: 'Side effects',        group: 'Pharmacologic',         prompt: 'Any side effects?' },
+      { key: 'sickDay',      letter: '8',  label: 'Sick day rules',      group: 'Pharmacologic',         prompt: 'Do you know which medications to pause or adjust when you are unwell with vomiting, diarrhea or fever?' },
       { key: 'missed',       letter: '9',  label: 'Missed doses',        group: 'Adherence',             prompt: 'How often do you miss a dose?' },
       { key: 'barriers',     letter: '10', label: 'Barriers',            group: 'Adherence',             prompt: 'What makes it hard to take them (cost, side effects, complexity, beliefs)?' },
       { key: 'aids',         letter: '11', label: 'Aids',                group: 'Adherence',             prompt: 'Do you use a pill organizer, blister pack or reminders?' },
@@ -75,21 +78,17 @@ Object.assign(CHE.frameworks, {
   complications: {
     id: 'complications',
     rows: [
-      { key: 'disease',    letter: '1', label: 'Of the condition', prompt: 'Has the condition caused any complications (e.g. end-organ damage)?' },
-      { key: 'treatment',  letter: '2', label: 'Of treatment',     prompt: 'Any complications from treatment?' },
-      { key: 'admissions', letter: '3', label: 'Admissions',       prompt: 'Any recent hospital admissions? When, why, how long, any ICU stay?' },
-      { key: 'procedures', letter: '4', label: 'Procedures',       prompt: 'Any recent surgery or procedures?' },
-      { key: 'flares',     letter: '5', label: 'Flares',           prompt: 'Any flares or ED visits in the past 12 months?' }
+      { key: 'disease',          letter: '1', label: 'Of the condition', prompt: 'Has the condition caused any complications (e.g. end-organ damage)?' },
+      { key: 'flares',           letter: '2', label: 'Flares',           prompt: 'How many flares have you had in the past 12 months? What triggered them?' },
+      { key: 'hospitalizations', letter: '3', label: 'Hospitalizations', prompt: 'Any ED visits, admissions, procedures or surgery for it? When, why, how long, any ICU stay?' }
     ]
   },
 
   'ongoing-symptoms': {
     id: 'ongoing-symptoms',
     rows: [
-      { key: 'current', letter: '1', label: 'Current symptoms', prompt: 'What symptoms do you have now, compared with your usual?' },
-      { key: 'trend',   letter: '2', label: 'Trend',            prompt: 'Are things improving, stable or worsening?' },
-      { key: 'flares',  letter: '3', label: 'Flares',           prompt: 'How often do you have flares?' },
-      { key: 'new',     letter: '4', label: 'New symptoms',     prompt: 'Any new symptoms?' }
+      { key: 'new',   letter: '1', label: 'New symptoms', prompt: 'Any new symptoms?' },
+      { key: 'trend', letter: '2', label: 'Trend',        prompt: 'How are your usual symptoms compared with before: improving, stable or worsening?' }
     ]
   },
 
@@ -175,7 +174,7 @@ CHE.history.chronic = {
     {
       id: 'complications',
       title: 'Complications',
-      summary: 'Effects of the disease and its treatment, including recent admissions and surgery.',
+      summary: 'Effects of the condition, flares, and hospital care (ED visits, admissions, procedures and surgery). Treatment side effects are covered under Management.',
       slots: ['condition'],
       core: [
         { type: 'framework', id: 'complications' }

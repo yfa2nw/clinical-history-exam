@@ -68,7 +68,11 @@ CHE.registerCondition({
         'Do you take fludrocortisone? What dose?',
         'Do you take other medications that affect cortisol levels?'
       ],
-      sideEffects: ['Any weight gain, high BG, thin skin, bruising or poor sleep? (over-replacement)'],
+      sideEffects: [
+        'Any weight gain, high BG, thin skin, bruising or poor sleep? (over-replacement)',
+        'Any osteoporosis, weight gain or DM from over-replacement?',
+        'Any HTN or swelling on fludrocortisone?'
+      ],
       sickDay: [
         'When you have a fever or are unwell, do you know to double your dose (or triple, for a high fever)?',
         'If you are vomiting or cannot keep tablets down, do you know to give the emergency injection and go to the ED?',
@@ -79,14 +83,10 @@ CHE.registerCondition({
     },
     complications: {
       disease: ['How many adrenal crises have you had?'],
-      treatment: [
-        'Any osteoporosis, weight gain or DM from over-replacement?',
-        'Any HTN or swelling on fludrocortisone?'
-      ],
-      admissions: ['Any admissions for an adrenal crisis or illness needing IV hydrocortisone?']
+      hospitalizations: ['Any admissions for an adrenal crisis or illness needing IV hydrocortisone?']
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -98,8 +98,8 @@ CHE.registerCondition({
       ]
     },
     'social-impact': {
-      work: ['Can you take doses on time at work? Have you told your employer?'],
       transport: ['When you travel, do you carry your emergency kit and a letter?'],
+      work: ['Can you take doses on time at work? Have you told your employer?'],
       relationships: ['Are you planning a pregnancy? (doses usually rise in late pregnancy and during delivery)'],
       mood: ['Any low mood or anxiety about having a crisis?'],
       supports: ['Who at home can give the emergency injection?']

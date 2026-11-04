@@ -32,14 +32,14 @@ CHE.registerCondition({
     'risk-factors': {
       family: ['Any family history of kidney stones?'],
       genetic: ['Any inherited condition, such as cystinuria or renal tubular acidosis?'],
-      lifestyle: [
-        'How much fluid do you drink in a day? How much urine do you pass?',
-        'How much salt, meat and high-oxalate food (e.g. spinach, nuts, tea) do you eat? Any sugary drinks?',
-        'Has your weight changed? (obesity raises stone risk)'
-      ],
       exposures: [
         'Do you work somewhere hot, or where it is hard to drink or void?',
         'Do you take calcium or vitamin C supplements, topiramate, acetazolamide or loop diuretics?'
+      ],
+      diet: [
+        'How much fluid do you drink in a day? How much urine do you pass?',
+        'How much salt, meat and high-oxalate food (e.g. spinach, nuts, tea) do you eat? Any sugary drinks?',
+        'Has your weight changed? (obesity raises stone risk)'
       ],
       related: [
         'Any gout, DM, HTN or obesity?',
@@ -70,12 +70,22 @@ CHE.registerCondition({
       ],
       education: ['Do you know what to do if you get renal colic again?'],
       allied: ['Have you seen a dietitian?'],
+      ongoing: ['Do you have a stent in now? When is it due to come out?'],
       medications: [
         'Are you on a thiazide, potassium citrate or allopurinol to prevent stones?',
         'Do you have medication to take for renal colic (e.g. an NSAID) or to help a stone pass (e.g. tamsulosin)?'
       ],
       sideEffects: ['Any dizziness, gout or low potassium on a thiazide? Any GI upset on potassium citrate?'],
-      procedures: [
+      followUp: ['Do you attend your urology or stone clinic appointments?']
+    },
+    complications: {
+      disease: [
+        'Have you had a UTI or kidney infection with a stone?',
+        'Has a stone ever blocked a kidney (obstructive uropathy)?',
+        'Has your kidney function fallen? (chronic kidney disease)'
+      ],
+      flares: ['How often do you pass a stone or have renal colic?'],
+      hospitalizations: [
         {
           text: 'Which procedures have you had for stones?',
           options: [
@@ -85,21 +95,12 @@ CHE.registerCondition({
             'A nephrostomy tube for a blocked, infected kidney'
           ]
         },
-        'Do you have a stent in now? When is it due to come out?'
-      ],
-      followUp: ['Do you attend your urology or stone clinic appointments?']
-    },
-    complications: {
-      disease: [
-        'Have you had a UTI or kidney infection with a stone?',
-        'Has a stone ever blocked a kidney (obstructive uropathy)?',
-        'Has your kidney function fallen? (chronic kidney disease)'
-      ],
-      treatment: ['Any bleeding, infection or stent pain after a procedure? Any retained stent?'],
-      admissions: ['How many ED visits or admissions for stones in the past year?']
+        'Any bleeding, infection or stent pain after a procedure? Any retained stent?',
+        'How many ED visits or admissions for stones in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -108,13 +109,12 @@ CHE.registerCondition({
             'Urgency, frequency or hematuria while a stent is in'
           ]
         }
-      ],
-      flares: ['How often do you pass a stone or have renal colic?']
+      ]
     },
     'social-impact': {
       food: ['How do the diet changes affect your meals?'],
-      work: ['How much work or study have you missed for stones? Can you drink and void freely at work?'],
       transport: ['Does fear of renal colic affect your driving or travel?'],
+      work: ['How much work or study have you missed for stones? Can you drink and void freely at work?'],
       relationships: ['Are you planning a pregnancy? (stones and imaging need special care)'],
       mood: ['Do you worry about the next episode?']
     }

@@ -75,16 +75,7 @@ CHE.registerCondition({
       lifestyle: ['Do you limit salt, potassium, phosphate or fluid? How much fluid are you allowed a day?'],
       education: ['Do you check with a pharmacist before starting new medications, and avoid NSAIDs?'],
       allied: ['Have you seen a dietitian?'],
-      medications: [
-        'Are you on an ACE inhibitor or ARB? An SGLT2 inhibitor?',
-        'What is your BP target, and are you reaching it? How well controlled is your DM?',
-        'Do you have iron or erythropoietin injections for anemia?',
-        'Do you take phosphate binders, vitamin D or calcium?',
-        'Do you take sodium bicarbonate, potassium binders or diuretics?',
-        'Have your medication doses been adjusted for your kidney function?'
-      ],
-      sickDay: ["When unwell and unable to keep fluids down, do you know to pause ACE inhibitors or ARBs, SGLT2 inhibitors, diuretics and metformin, and avoid NSAIDs?"],
-      procedures: [
+      ongoing: [
         {
           text: 'Are you on dialysis, or have you had a transplant?',
           options: [
@@ -96,6 +87,15 @@ CHE.registerCondition({
           ]
         }
       ],
+      medications: [
+        'Are you on an ACE inhibitor or ARB? An SGLT2 inhibitor?',
+        'What is your BP target, and are you reaching it? How well controlled is your DM?',
+        'Do you have iron or erythropoietin injections for anemia?',
+        'Do you take phosphate binders, vitamin D or calcium?',
+        'Do you take sodium bicarbonate, potassium binders or diuretics?',
+        'Have your medication doses been adjusted for your kidney function?'
+      ],
+      sickDay: ['When unwell and unable to keep fluids down, do you know to pause ACE inhibitors or ARBs, SGLT2 inhibitors, diuretics and metformin, and avoid NSAIDs?'],
       missed: ['How many dialysis sessions have you missed or shortened recently?']
     },
     complications: {
@@ -107,18 +107,26 @@ CHE.registerCondition({
         'Any heart attack, stroke or HF?',
         'Any gout?'
       ],
-      treatment: [
+      hospitalizations: [
         'Any clotted or infected fistula or dialysis catheter?',
         'Any peritonitis on peritoneal dialysis?',
-        'After a transplant: any rejection episodes, serious infections or skin cancers?'
-      ],
-      admissions: ['Any AKI episodes or hospital admissions in the past year?']
+        'After a transplant: any rejection episodes, serious infections or skin cancers?',
+        'Any AKI episodes or hospital admissions in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
-          options: ['Fatigue', 'Itch', 'Nocturia', 'Ankle swelling', 'Poor appetite or nausea', 'Muscle cramps or restless legs', 'Poor sleep']
+          options: [
+            'Fatigue',
+            'Itch',
+            'Nocturia',
+            'Ankle swelling',
+            'Poor appetite or nausea',
+            'Muscle cramps or restless legs',
+            'Poor sleep'
+          ]
         }
       ]
     },

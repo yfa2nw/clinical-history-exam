@@ -81,10 +81,6 @@ CHE.registerCondition({
         'When unwell with a fever, do you know to double your hydrocortisone, and use the injection if you are vomiting?',
         'On desmopressin: do you know to drink only to thirst, and to seek advice if you have vomiting or diarrhea?'
       ],
-      procedures: [
-        'Have you had pituitary surgery (through the nose)? When?',
-        'Have you had radiotherapy to the pituitary?'
-      ],
       missed: ['Do you take every replacement every day?']
     },
     complications: {
@@ -94,14 +90,16 @@ CHE.registerCondition({
         'In acromegaly: any HTN, DM, sleep apnea, joint pain or colon polyps?',
         'In Cushing disease: any DM, HTN, osteoporosis or clots?'
       ],
-      treatment: [
+      hospitalizations: [
+        'Have you had pituitary surgery (through the nose)? When?',
+        'Have you had radiotherapy to the pituitary?',
         'After surgery: any CSF leak, DI or new hormone deficiencies?',
-        'After radiotherapy: any new hormone deficiencies over the years?'
-      ],
-      admissions: ['Any admissions for an adrenal crisis, low or high sodium, or apoplexy?']
+        'After radiotherapy: any new hormone deficiencies over the years?',
+        'Any admissions for an adrenal crisis, low or high sodium, or apoplexy?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [

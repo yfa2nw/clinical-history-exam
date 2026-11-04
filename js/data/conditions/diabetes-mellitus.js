@@ -30,9 +30,10 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of DM or early heart disease?'],
-      substances: ['Do you smoke? (heart, vessel and kidney complications)'],
-      lifestyle: ['What do you eat in a typical day? How active are you? Has your weight changed?'],
+      smoking: ['Do you smoke? (heart, vessel and kidney complications)'],
+      activity: ['How active are you?'],
       exposures: ['Do you take corticosteroids or antipsychotics? (raise BG)'],
+      diet: ['What do you eat in a typical day? Has your weight changed?'],
       related: [
         'Any HTN, high cholesterol, obesity or fatty liver?',
         'Any gestational DM or PMOS?'
@@ -69,10 +70,10 @@ CHE.registerCondition({
       ],
       sideEffects: [
         'Any hypoglycemia? How often, how severe, and do you still get warning symptoms?',
-        'Any GI upset on metformin or GLP-1 agonists, or genital infections on SGLT2 inhibitors?'
+        'Any GI upset on metformin or GLP-1 agonists, or genital infections on SGLT2 inhibitors?',
+        'Any severe hypoglycemia needing help from someone else?'
       ],
       sickDay: ['When unwell, do you know to keep taking insulin, check BG and ketones more often, keep drinking, and pause metformin and SGLT2 inhibitors?'],
-      procedures: ['Any laser treatment for your eyes, amputations or weight-loss surgery?'],
       missed: ['Do you ever skip insulin or tablets? What gets in the way?'],
       barriers: ['Any problems with the cost of, or access to, medications and testing supplies?']
     },
@@ -85,11 +86,13 @@ CHE.registerCondition({
         'Any heart attack, stroke or peripheral vascular disease?',
         'Any erectile dysfunction, gastroparesis or dizziness on standing (autonomic neuropathy)?'
       ],
-      treatment: ['Any severe hypoglycemia needing help from someone else?'],
-      admissions: ['Any admissions for DKA, hyperosmolar hyperglycemic state or hypoglycemia?']
+      hospitalizations: [
+        'Any laser treatment for your eyes, amputations or weight-loss surgery?',
+        'Any admissions for DKA, hyperosmolar hyperglycemic state or hypoglycemia?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected findings do you have, and how do they compare with usual?',
           options: [

@@ -31,12 +31,13 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of diverticular disease or bowel cancer?'],
-      substances: ['Do you smoke? (raises the risk of complications)'],
-      lifestyle: [
-        'How much fiber do you eat? How active are you?',
+      smoking: ['Do you smoke? (raises the risk of complications)'],
+      activity: ['How active are you?'],
+      exposures: ['Do you take NSAIDs, aspirin, corticosteroids or opioids? (raise the risk of bleeding and perforation)'],
+      diet: [
+        'How much fiber do you eat?',
         'Has your weight changed? (obesity raises the risk)'
       ],
-      exposures: ['Do you take NSAIDs, aspirin, corticosteroids or opioids? (raise the risk of bleeding and perforation)'],
       related: [
         'Any constipation?',
         'Any immunosuppression? (more severe episodes)',
@@ -70,16 +71,13 @@ CHE.registerCondition({
       lifestyle: ['Do you eat a high-fiber diet and drink enough fluid? Have you stopped smoking?'],
       education: ['Do you know what to do if an episode starts, and when you need antibiotics?'],
       allied: ['Have you seen a dietitian?'],
+      ongoing: ['Do you have a stoma, or has one been reversed?'],
       medications: [
         'Do you take fiber supplements or laxatives?',
         'Do you have medication for pain during flares? Do you avoid NSAIDs and opioids?'
       ],
       previous: ['How many courses of antibiotics have you needed for diverticulitis?'],
       sideEffects: ['Any diarrhea or C. difficile infection after antibiotics?'],
-      procedures: [
-        'Have you had a drain for an abscess?',
-        'Have you had bowel surgery (a resection)? Do you have a stoma, or has one been reversed?'
-      ],
       followUp: ['Have you had a surgical opinion about recurrent episodes?']
     },
     complications: {
@@ -89,11 +87,16 @@ CHE.registerCondition({
         'Any narrowing of the bowel (stricture) or obstruction?',
         'Any diverticular bleeding needing a transfusion?'
       ],
-      treatment: ['Any problems after surgery or with a stoma?'],
-      admissions: ['Any admissions for diverticulitis or bleeding in the past year?']
+      flares: ['How often do you have flares? Have they become more frequent or more severe?'],
+      hospitalizations: [
+        'Have you had a drain for an abscess?',
+        'Have you had bowel surgery (a resection)?',
+        'Any problems after surgery or with a stoma?',
+        'Any admissions for diverticulitis or bleeding in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -103,8 +106,7 @@ CHE.registerCondition({
             'Constipation or variable bowel habit'
           ]
         }
-      ],
-      flares: ['How often do you have flares? Have they become more frequent or more severe?']
+      ]
     },
     'social-impact': {
       toileting: ['Any urgency, or problems managing a stoma?'],

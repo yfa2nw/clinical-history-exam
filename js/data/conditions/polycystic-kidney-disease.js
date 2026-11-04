@@ -27,8 +27,8 @@ CHE.registerCondition({
         'Has anyone in your family had a brain aneurysm or SAH?'
       ],
       genetic: ['Have your relatives been offered screening or genetic testing?'],
-      substances: ['Do you smoke? (aneurysm rupture, faster decline)'],
-      lifestyle: ['How much salt and fluid do you have a day?'],
+      smoking: ['Do you smoke? (aneurysm rupture, faster decline)'],
+      diet: ['How much salt and fluid do you have a day?'],
       related: ['Any HTN? When was it first found? (often before age 30)']
     },
     presentation: {
@@ -57,17 +57,17 @@ CHE.registerCondition({
     management: {
       lifestyle: ['Have you been advised to drink more water and limit salt?'],
       education: ['Have you had genetic counseling?'],
+      ongoing: ['Are you on dialysis, or have you had a transplant?'],
       medications: [
         'Are you on an ACE inhibitor or ARB? What is your BP target, and are you reaching it?',
         'Are you on tolvaptan? How are you coping with the thirst and passing urine at night?',
         'Do you avoid NSAIDs for pain? What do you use instead?'
       ],
-      sideEffects: ['If on tolvaptan: are your liver blood tests being checked regularly?'],
-      sickDay: ["When unwell and unable to drink, do you know to pause tolvaptan and your ACE inhibitor or ARB?"],
-      procedures: [
-        'Have you had any cysts drained, or a kidney removed?',
-        'Are you on dialysis, or have you had a transplant?'
-      ]
+      sideEffects: [
+        'If on tolvaptan: are your liver blood tests being checked regularly?',
+        'Any liver problems or dehydration on tolvaptan?'
+      ],
+      sickDay: ['When unwell and unable to drink, do you know to pause tolvaptan and your ACE inhibitor or ARB?']
     },
     complications: {
       disease: [
@@ -79,11 +79,13 @@ CHE.registerCondition({
         'Any heart valve problems (mitral valve prolapse)?',
         'Any hernias or diverticular disease?'
       ],
-      treatment: ['Any liver problems or dehydration on tolvaptan?'],
-      admissions: ['Any hospital admissions for pain, bleeding or infection?']
+      hospitalizations: [
+        'Have you had any cysts drained, or a kidney removed?',
+        'Any hospital admissions for pain, bleeding or infection?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -97,12 +99,12 @@ CHE.registerCondition({
       ]
     },
     'social-impact': {
+      work: ['Does pain or tiredness affect your work?'],
       relationships: [
         'Have you talked with your partner or children about the inherited risk?',
         'Are you planning a pregnancy? (HTN and preeclampsia risk; tolvaptan must be stopped)'
       ],
       mood: ['How do you feel about having an inherited condition, especially if family members have needed dialysis?'],
-      work: ['Does pain or tiredness affect your work?'],
       finances: ['Has it affected your insurance?']
     }
   },

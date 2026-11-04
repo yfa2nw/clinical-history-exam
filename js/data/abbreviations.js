@@ -118,6 +118,7 @@ CHE.abbreviations = {
   'RCC': 'Renal cell carcinoma',
   'RLQ': 'Right lower quadrant',
   'RUQ': 'Right upper quadrant',
+  'SADPEDO': 'Mnemonic for modifiable risk factors: smoking, alcohol, drugs, physical activity, exposures, diet, others (comorbidities)',
   'SAH': 'Subarachnoid hemorrhage',
   'SGLT2': 'Sodium-glucose cotransporter 2',
   'SHAFT': 'Mnemonic for IADLs: shopping, housekeeping, accounting, food preparation, transportation',

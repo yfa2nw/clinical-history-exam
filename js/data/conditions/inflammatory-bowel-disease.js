@@ -29,7 +29,7 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of IBD, celiac disease or bowel cancer?'],
-      substances: ['Do you smoke? (worsens Crohn disease)'],
+      smoking: ['Do you smoke? (worsens Crohn disease)'],
       exposures: ['Do you take NSAIDs, or have you had antibiotics recently? (can trigger flares)'],
       related: ['Any joint, skin, eye or liver problems (primary sclerosing cholangitis)?']
     },
@@ -62,6 +62,7 @@ CHE.registerCondition({
       lifestyle: ['Have you stopped smoking? Have you made any changes to your diet?'],
       education: ['Do you have a written flare plan, and an IBD nurse or helpline to contact?'],
       allied: ['Do you see an IBD nurse or a dietitian?'],
+      ongoing: ['Do you have a stoma or a pouch? How are you managing it?'],
       medications: [
         'Are you on 5-ASA (mesalamine)?',
         'Are you on azathioprine, methotrexate or a biologic (e.g. infliximab, adalimumab, vedolizumab)?',
@@ -69,13 +70,10 @@ CHE.registerCondition({
       ],
       sideEffects: [
         'Any infections, liver problems or low blood counts on immunosuppressants?',
-        'Are your blood tests being monitored?'
+        'Are your blood tests being monitored?',
+        'Any serious infections, skin cancers or osteoporosis from treatment?'
       ],
       sickDay: ['If you have a fever or an infection, do you know to seek advice before your next immunosuppressant or biologic dose?'],
-      procedures: [
-        'Have you had bowel surgery (a resection or colectomy)? Do you have a stoma or a pouch?',
-        'Any surgery for a perianal abscess or fistula?'
-      ],
       missed: ['Do you keep taking your medications when you feel well?']
     },
     complications: {
@@ -88,14 +86,16 @@ CHE.registerCondition({
         'Any blood clots?',
         'Any bowel cancer or precancerous changes found?'
       ],
-      treatment: [
-        'Any serious infections, skin cancers or osteoporosis from treatment?',
-        'Any problems with your stoma or pouch?'
-      ],
-      admissions: ['Any hospital admissions for flares in the past year? Did you need IV steroids?']
+      flares: ['How many flares have you had in the past year? What triggered them?'],
+      hospitalizations: [
+        'Have you had bowel surgery (a resection or colectomy)?',
+        'Any surgery for a perianal abscess or fistula?',
+        'Any problems with your stoma or pouch?',
+        'Any hospital admissions for flares in the past year? Did you need IV steroids?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -104,8 +104,7 @@ CHE.registerCondition({
             'Fatigue'
           ]
         }
-      ],
-      flares: ['How many flares have you had in the past year? What triggered them?']
+      ]
     },
     'social-impact': {
       toileting: ['Any urgency or incontinence? Do you carry a toilet access card?'],

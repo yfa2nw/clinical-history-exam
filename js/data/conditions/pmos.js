@@ -20,8 +20,9 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of PMOS, type 2 DM or early heart disease?'],
-      substances: ['Do you smoke?'],
-      lifestyle: ['What do you eat in a typical day? How active are you? Has your weight changed?'],
+      smoking: ['Do you smoke?'],
+      activity: ['How active are you?'],
+      diet: ['What do you eat in a typical day? Has your weight changed?'],
       related: [
         'Any type 2 DM, prediabetes or gestational DM?',
         'Any high cholesterol or HTN?',
@@ -59,8 +60,10 @@ CHE.registerCondition({
         'Are you on spironolactone or another treatment for excess hair or acne? Do you use effective contraception with it?',
         'Are you on letrozole or another treatment to help ovulation?'
       ],
-      sideEffects: ['Any headaches, mood changes or leg swelling on the pill? Any GI upset on metformin?'],
-      procedures: ['Have you had laser or electrolysis for hair, or fertility treatment?']
+      sideEffects: [
+        'Any headaches, mood changes or leg swelling on the pill? Any GI upset on metformin?',
+        'Any blood clots on the combined pill?'
+      ]
     },
     complications: {
       disease: [
@@ -69,10 +72,10 @@ CHE.registerCondition({
         'Any gestational DM or preeclampsia in a past pregnancy?',
         'Has an endometrial biopsy ever been needed?'
       ],
-      treatment: ['Any blood clots on the combined pill?']
+      hospitalizations: ['Have you had laser or electrolysis for hair, or fertility treatment?']
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [

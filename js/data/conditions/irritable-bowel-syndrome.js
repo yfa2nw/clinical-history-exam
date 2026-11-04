@@ -29,8 +29,8 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of IBS, IBD, celiac disease or bowel cancer?'],
-      lifestyle: ['Do any foods trigger your symptoms (e.g. high-FODMAP foods, caffeine, alcohol, fatty or spicy food)?'],
       exposures: ['Did it start after a gut infection? (post-infectious IBS)'],
+      diet: ['Do any foods trigger your symptoms (e.g. high-FODMAP foods, caffeine, alcohol, fatty or spicy food)?'],
       related: ['Any anxiety, depression, fibromyalgia or chronic fatigue?']
     },
     presentation: {
@@ -38,8 +38,8 @@ CHE.registerCondition({
     },
     investigations: {
       blood: ['Have you had blood tests for celiac disease and anemia?'],
-      monitoring: ['Have you had a stool calprotectin test to exclude IBD?'],
-      biopsy: ['Have you had a colonoscopy? Why, and what did it show?']
+      biopsy: ['Have you had a colonoscopy? Why, and what did it show?'],
+      monitoring: ['Have you had a stool calprotectin test to exclude IBD?']
     },
     management: {
       lifestyle: ['Have you tried regular meals, adjusting fiber, or a low-FODMAP diet with a dietitian?'],
@@ -50,10 +50,11 @@ CHE.registerCondition({
     },
     complications: {
       disease: ['Has it affected your weight or what you are able to eat?'],
-      admissions: ['Any ED visits or admissions for abdominal pain?']
+      flares: ['What triggers a bad spell: food, stress, periods?'],
+      hospitalizations: ['Any ED visits or admissions for abdominal pain?']
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -64,8 +65,7 @@ CHE.registerCondition({
             'A feeling of incomplete emptying'
           ]
         }
-      ],
-      flares: ['What triggers a bad spell: food, stress, periods?']
+      ]
     },
     'social-impact': {
       toileting: ['Do you worry about reaching a toilet in time?'],

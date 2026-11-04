@@ -36,15 +36,16 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of liver disease, hemochromatosis or Wilson disease?'],
-      substances: [
+      alcohol: [
         'How much alcohol do you drink now, and how much in the past? When was your last drink?',
         'Have you ever had withdrawal symptoms when you stopped drinking?'
       ],
-      lifestyle: ['Has your weight changed recently? (MASLD, or muscle loss in cirrhosis)'],
+      drugs: ['Have you ever injected drugs? (viral hepatitis)'],
       exposures: [
-        'Any IV drug use, tattoos, blood transfusions or unprotected sex? (viral hepatitis)',
+        'Any tattoos, blood transfusions or unprotected sex? (viral hepatitis)',
         'Any herbal remedies or OTC medications, including acetaminophen?'
       ],
+      diet: ['Has your weight changed recently? (MASLD, or muscle loss in cirrhosis)'],
       related: [
         'Any DM, obesity, high cholesterol or HTN? (MASLD)',
         'Any IBD? (primary sclerosing cholangitis)',
@@ -92,12 +93,11 @@ CHE.registerCondition({
         'Are you on antibiotics to prevent peritonitis?',
         'Do you avoid NSAIDs and sedatives, and limit acetaminophen?'
       ],
-      sideEffects: ['Any dizziness on standing, cramps or confusion on diuretics or beta-blockers?'],
-      sickDay: ['When unwell with vomiting or diarrhea, do you know to pause diuretics and seek advice, while keeping up lactulose?'],
-      procedures: [
-        'Have you had variceal banding, ascitic drains or a shunt (TIPS)?',
-        'Have you been assessed for a liver transplant, or had one?'
+      sideEffects: [
+        'Any dizziness on standing, cramps or confusion on diuretics or beta-blockers?',
+        'Any low sodium, high potassium or kidney injury from diuretics?'
       ],
+      sickDay: ['When unwell with vomiting or diarrhea, do you know to pause diuretics and seek advice, while keeping up lactulose?'],
       missed: ['Do you take your lactulose every day as prescribed?']
     },
     complications: {
@@ -109,11 +109,14 @@ CHE.registerCondition({
         'Any kidney problems?',
         'Have you been told you have liver cancer?'
       ],
-      treatment: ['Any low sodium, high potassium or kidney injury from diuretics?'],
-      admissions: ['Any hospital admissions for bleeding, confusion, infection or fluid?']
+      hospitalizations: [
+        'Have you had variceal banding, ascitic drains or a shunt (TIPS)?',
+        'Have you been assessed for a liver transplant, or had one?',
+        'Any hospital admissions for bleeding, confusion, infection or fluid?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [

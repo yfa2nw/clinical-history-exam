@@ -38,12 +38,12 @@ CHE.registerCondition({
     'risk-factors': {
       family: ['Any family history of kidney disease or dialysis?'],
       genetic: ['Have you had any genetic testing? (some FSGS)'],
-      substances: ['Do you smoke? (worsens kidney function and vasculitis)'],
-      lifestyle: ['How much salt and protein do you eat?'],
+      smoking: ['Do you smoke? (worsens kidney function and vasculitis)'],
       exposures: [
         'Any NSAIDs, lithium or bisphosphonates?',
         'Any recent infections, such as a sore throat or hepatitis B or C?'
       ],
+      diet: ['How much salt and protein do you eat?'],
       related: [
         'Any SLE or vasculitis?',
         'Any DM or HTN?',
@@ -77,6 +77,7 @@ CHE.registerCondition({
       lifestyle: ['Do you limit salt and fluid? Have you stopped smoking?'],
       education: ['Do you have a plan for what to do if your swelling or frothy urine comes back?'],
       allied: ['Have you seen a dietitian?'],
+      ongoing: ['Are you on dialysis, or have you had a kidney transplant?'],
       medications: [
         'Are you on an ACE inhibitor or ARB, or an SGLT2 inhibitor, to reduce protein loss?',
         'Are you on corticosteroids? What dose, and what is the tapering plan?',
@@ -87,10 +88,11 @@ CHE.registerCondition({
       previous: ['Which treatments have you had before, and did they bring remission?'],
       sideEffects: [
         'On corticosteroids: any weight gain, high BG, mood or sleep changes?',
-        'Any infections, low blood counts, hair loss or tremor on other immunosuppressants?'
+        'Any infections, low blood counts, hair loss or tremor on other immunosuppressants?',
+        'Any osteoporosis, cataracts or DM from corticosteroids?',
+        'Any cancers (e.g. skin) or fertility problems from immunosuppressants?'
       ],
       sickDay: ['When unwell and unable to keep fluids down, do you know to pause ACE inhibitors or ARBs, SGLT2 inhibitors and diuretics, and never to stop corticosteroids suddenly?'],
-      procedures: ['Have you had plasma exchange, dialysis or a kidney transplant?'],
       missed: ['Do you take your immunosuppressants on time every day, even when well?'],
       followUp: ['Do you have your blood tests done before each clinic visit?']
     },
@@ -101,14 +103,14 @@ CHE.registerCondition({
         'Any high cholesterol or HTN since diagnosis?',
         'Has your kidney function fallen? (chronic kidney disease)'
       ],
-      treatment: [
-        'Any osteoporosis, cataracts or DM from corticosteroids?',
-        'Any cancers (e.g. skin) or fertility problems from immunosuppressants?'
-      ],
-      admissions: ['Any admissions for relapse, infection or clots in the past year?']
+      flares: ['How many relapses have you had? What triggered them (infection, tapering corticosteroids)?'],
+      hospitalizations: [
+        'Have you had plasma exchange?',
+        'Any admissions for relapse, infection or clots in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -118,8 +120,7 @@ CHE.registerCondition({
             'Fatigue'
           ]
         }
-      ],
-      flares: ['How many relapses have you had? What triggered them (infection, tapering corticosteroids)?']
+      ]
     },
     'social-impact': {
       food: ['How do the salt and fluid limits affect your meals?'],

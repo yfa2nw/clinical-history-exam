@@ -31,7 +31,7 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Any family history of thyroid disease or other autoimmune disease?'],
-      substances: ['Do you smoke? (worsens thyroid eye disease)'],
+      smoking: ['Do you smoke? (worsens thyroid eye disease)'],
       exposures: [
         'Do you take amiodarone, lithium or immunotherapy for cancer?',
         'Any iodine contrast, kelp or iodine supplements recently?'
@@ -75,17 +75,8 @@ CHE.registerCondition({
       sideEffects: [
         'Any rash, itch or joint pain on antithyroid drugs?',
         'Any sore throat, fever or mouth ulcers? (agranulocytosis)',
-        'Any jaundice or dark urine? (liver injury)'
-      ],
-      procedures: [
-        {
-          text: 'Have you had definitive treatment?',
-          options: [
-            'Radioiodine: when, and did you follow the precautions?',
-            'Thyroidectomy: total or partial, and any problems after?',
-            'Neither yet: has it been discussed?'
-          ]
-        }
+        'Any jaundice or dark urine? (liver injury)',
+        'Any low blood count or liver problems from antithyroid drugs?'
       ],
       missed: ['Do you take your tablets every day?']
     },
@@ -95,15 +86,23 @@ CHE.registerCondition({
         'Any thyroid eye disease: bulging, grittiness, diplopia or blurred vision?',
         'Any osteoporosis?'
       ],
-      treatment: [
-        'Any low blood count or liver problems from antithyroid drugs?',
+      flares: ['Have you relapsed after stopping treatment before?'],
+      hospitalizations: [
+        {
+          text: 'Have you had definitive treatment?',
+          options: [
+            'Radioiodine: when, and did you follow the precautions?',
+            'Thyroidectomy: total or partial, and any problems after?',
+            'Neither yet: has it been discussed?'
+          ]
+        },
         'After surgery: any hoarseness or low calcium?',
-        'After radioiodine or surgery: have you become hypothyroid?'
-      ],
-      admissions: ['Any admissions for thyroid storm, AF or drug side effects?']
+        'After radioiodine or surgery: have you become hypothyroid?',
+        'Any admissions for thyroid storm, AF or drug side effects?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -112,8 +111,7 @@ CHE.registerCondition({
             'Mild eye grittiness'
           ]
         }
-      ],
-      flares: ['Have you relapsed after stopping treatment before?']
+      ]
     },
     'social-impact': {
       transport: ['Does diplopia affect your driving?'],

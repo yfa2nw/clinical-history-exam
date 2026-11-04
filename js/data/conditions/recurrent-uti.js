@@ -37,14 +37,13 @@ CHE.registerCondition({
     'risk-factors': {
       family: ['Any family history of UTIs, or of kidney or bladder abnormalities?'],
       genetic: ['Any congenital urinary tract abnormality, or reflux as a child?'],
-      lifestyle: [
-        'How much fluid do you drink in a day? Do you hold on to urine for long periods?',
-        'Do you void after sex? Do you use spermicide or a diaphragm?'
-      ],
       exposures: [
+        'Do you hold on to urine for long periods, for example at work?',
+        'Do you void after sex? Do you use spermicide or a diaphragm?',
         'Do you use a urinary catheter, or self-catheterize?',
         'Are you on an SGLT2 inhibitor or immunosuppressants?'
       ],
+      diet: ['How much fluid do you drink in a day?'],
       related: [
         'Any DM?',
         'Any kidney stones?',
@@ -77,19 +76,22 @@ CHE.registerCondition({
       ],
       previous: ['Which antibiotics have you had in the past year? Did they work?'],
       sideEffects: ['Any diarrhea, C. difficile infection, thrush or rash from antibiotics?'],
-      procedures: ['Any procedures on the bladder, prostate or kidneys (e.g. stone removal, prolapse repair)?'],
       missed: ['Do you take your preventive treatment every day?']
     },
     complications: {
       disease: [
         'Any kidney infections or sepsis?',
-        'Any kidney scarring, or fall in kidney function?'
+        'Any kidney scarring, or fall in kidney function?',
+        'Any infections with organisms resistant to most oral antibiotics?'
       ],
-      treatment: ['Any infections with organisms resistant to most oral antibiotics?'],
-      admissions: ['Any ED visits or admissions for UTIs in the past year?']
+      flares: ['How often do the infections come, and how quickly do they settle?'],
+      hospitalizations: [
+        'Any procedures on the bladder, prostate or kidneys (e.g. stone removal, prolapse repair)?',
+        'Any ED visits or admissions for UTIs in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -97,8 +99,7 @@ CHE.registerCondition({
             'Dysuria, frequency and urgency during an infection, settling with antibiotics'
           ]
         }
-      ],
-      flares: ['How often do the infections come, and how quickly do they settle?']
+      ]
     },
     'social-impact': {
       toileting: ['Can you reach and use a toilet when you need to?'],

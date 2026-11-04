@@ -33,13 +33,14 @@ CHE.registerCondition({
     },
     'risk-factors': {
       family: ['Did either parent have a hip fracture?'],
-      substances: ['Do you smoke? How much alcohol do you drink?'],
-      lifestyle: [
+      smoking: ['Do you smoke?'],
+      alcohol: ['How much alcohol do you drink?'],
+      activity: ['How active are you? Do you do weight-bearing or balance exercise?'],
+      exposures: ['Do you take corticosteroids, PPIs, anti-epileptics, aromatase inhibitors or androgen deprivation therapy?'],
+      diet: [
         'How much calcium do you get in your diet? How much time do you spend outdoors?',
-        'How active are you? Do you do weight-bearing or balance exercise?',
         'Has your weight dropped, or have you had an eating disorder?'
       ],
-      exposures: ['Do you take corticosteroids, PPIs, anti-epileptics, aromatase inhibitors or androgen deprivation therapy?'],
       related: [
         'When did you go through menopause? Any early menopause or periods stopping for a long time?',
         'Any RA, celiac disease, IBD, chronic kidney disease or chronic liver disease?',
@@ -80,9 +81,10 @@ CHE.registerCondition({
       ],
       sideEffects: [
         'Any heartburn or pain on swallowing with bisphosphonate tablets?',
-        'Any flu-like illness after an infusion?'
+        'Any flu-like illness after an infusion?',
+        'Any thigh or groin pain? (atypical femoral fracture)',
+        'Any jaw pain, loose teeth or exposed bone in the mouth? (osteonecrosis of the jaw)'
       ],
-      procedures: ['Any surgery for fractures, or a procedure for a spinal fracture?'],
       missed: [
         'Do you take your weekly tablet every week?',
         'On denosumab: is your next injection on time? (missing doses can cause spinal fractures)'
@@ -95,14 +97,14 @@ CHE.registerCondition({
         'Any height loss or a curved back?',
         'Any chronic back pain?'
       ],
-      treatment: [
-        'Any thigh or groin pain? (atypical femoral fracture)',
-        'Any jaw pain, loose teeth or exposed bone in the mouth? (osteonecrosis of the jaw)'
-      ],
-      admissions: ['Any admissions for falls or fractures in the past year?']
+      hospitalizations: [
+        'Any surgery for fractures, or a procedure for a spinal fracture?',
+        'Any admissions for falls or fractures in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      new: ['Any falls since your last review?'],
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -111,8 +113,7 @@ CHE.registerCondition({
             'Height loss'
           ]
         }
-      ],
-      new: ['Any falls since your last review?']
+      ]
     },
     'social-impact': {
       ambulating: ['Do you use a walking aid? How many falls have you had in the past year?'],

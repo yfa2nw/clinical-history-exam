@@ -35,11 +35,9 @@ CHE.registerCondition({
     'risk-factors': {
       family: ['Any family history of pancreatitis or pancreatic cancer?'],
       genetic: ['Have you had genetic testing for hereditary pancreatitis or cystic fibrosis?'],
-      substances: [
-        'How much alcohol do you drink now, and how much in the past? When was your last drink?',
-        'Do you smoke? How much?'
-      ],
-      lifestyle: ['What do you eat in a typical day? Has your weight changed?'],
+      smoking: ['Do you smoke? How much?'],
+      alcohol: ['How much alcohol do you drink now, and how much in the past? When was your last drink?'],
+      diet: ['What do you eat in a typical day? Has your weight changed?'],
       related: [
         'Any gallstones?',
         'Any high triglycerides or high calcium (hyperparathyroidism)?',
@@ -89,10 +87,6 @@ CHE.registerCondition({
         'Any constipation, drowsiness or dependence on opioids?',
         'Any hypoglycemia? (more common in pancreatic DM)'
       ],
-      procedures: [
-        'Have you had an ERCP with stents or stone removal, or a nerve block for pain?',
-        'Have you had pancreatic surgery?'
-      ],
       missed: ['Do you ever skip your enzymes, for example when eating out?']
     },
     complications: {
@@ -104,11 +98,16 @@ CHE.registerCondition({
         'Any osteoporosis or fractures?',
         'Any blood clots in the abdominal veins?'
       ],
-      treatment: ['Any problems from ERCP, such as acute pancreatitis or infection?'],
-      admissions: ['Any admissions for pain flares or acute pancreatitis in the past year?']
+      flares: ['How often do you have pain flares? What triggers them (alcohol, fatty meals)?'],
+      hospitalizations: [
+        'Have you had an ERCP with stents or stone removal, or a nerve block for pain?',
+        'Have you had pancreatic surgery?',
+        'Any problems from ERCP, such as acute pancreatitis or infection?',
+        'Any admissions for pain flares or acute pancreatitis in the past year?'
+      ]
     },
     'ongoing-symptoms': {
-      current: [
+      trend: [
         {
           text: 'Which of these expected symptoms do you have, and how do they compare with usual?',
           options: [
@@ -118,8 +117,7 @@ CHE.registerCondition({
             'Fatigue'
           ]
         }
-      ],
-      flares: ['How often do you have pain flares? What triggers them (alcohol, fatty meals)?']
+      ]
     },
     'social-impact': {
       food: ['How does taking enzymes and eating small meals affect your eating?'],
