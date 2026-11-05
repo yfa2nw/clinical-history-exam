@@ -67,7 +67,7 @@ CHE.registerCondition({
     management: {
       lifestyle: ['Have you tried drinking more fluid, voiding after sex, and treating constipation?'],
       education: ['Do you have a plan for what to do when symptoms start?'],
-      allied: ['Have you seen a continence nurse or pelvic floor physiotherapist?'],
+      allied: ['Have you seen a continence nurse or pelvic floor physical therapist?'],
       medications: [
         'Are you on vaginal estrogen?',
         'Are you on methenamine, or D-mannose or cranberry products?',

@@ -15,7 +15,7 @@ CHE.registerModule({
   multiSystem: true,
   aka: ['tiredness', 'tired all the time', 'lethargy', 'low energy', 'exhaustion'],
   tags: ['endocrine'],
-  summary: 'Fatigue is common and nonspecific. Clarify what the patient means (sleepiness, weakness, breathlessness or low mood), then screen the systems; most causes reveal themselves through the associated symptoms.',
+  summary: 'Fatigue is common and nonspecific. Clarify what the patient means (sleepiness, weakness, dyspnea or low mood), then screen the systems; most causes reveal themselves through the associated symptoms.',
   ref: '',
   related: ['weight-change', 'temperature-sweating', 'polyuria-polydipsia', 'skin-changes', 'swelling', 'appearance-change', 'menstrual-sexual', 'weakness-numbness', 'dizziness', 'urinary-symptoms', 'diarrhea-constipation', 'memory-thinking', 'movement-change'],
   pc: {

@@ -208,8 +208,8 @@ CHE.registerExam({
           items: [
             {
               title: 'Light touch and pinprick',
-              how: 'Show the patient each sensation on the sternum first. With the eyes closed, test light touch (cotton wool) and then pinprick (a disposable neurotip) in each dermatome, comparing sides: C5 lateral upper arm, C6 lateral forearm and thumb, C7 middle finger, C8 little finger and medial forearm, T1 medial upper arm. Map any abnormal area from abnormal to normal.',
-              say: 'This is what the cotton wool feels like on your chest. Now close your eyes and say "yes" each time you feel it. Does it feel the same on both sides?',
+              how: 'Show the patient each sensation on the sternum first. With the eyes closed, test light touch (a wisp of cotton) and then pinprick (a disposable neurotip) in each dermatome, comparing sides: C5 lateral upper arm, C6 lateral forearm and thumb, C7 middle finger, C8 little finger and medial forearm, T1 medial upper arm. Map any abnormal area from abnormal to normal.',
+              say: 'This is what the cotton feels like on your chest. Now close your eyes and say "yes" each time you feel it. Does it feel the same on both sides?',
               lookFor: 'Reduced or absent sensation, and its distribution.',
               findings: [
                 { text: 'Loss in one dermatome', dx: ['Radiculopathy'] },

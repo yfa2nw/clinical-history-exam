@@ -144,6 +144,19 @@ CHE.registerExam({
   sections: {
     legs: [
       {
+        type: 'redflags',
+        title: 'Outside expectations: take an acute history',
+        items: [
+          { text: 'Hematemesis or melena, with tachycardia or low BP: variceal bleeding', see: ['upper-gi-symptoms', 'fecal-symptoms'] },
+          { text: 'Confusion, drowsiness or asterixis: hepatic encephalopathy', see: ['memory-thinking'] },
+          { text: 'Fever or abdominal tenderness with ascites: spontaneous bacterial peritonitis', see: ['abdominal-pain'] },
+          { text: 'Tense ascites with dyspnea: large-volume ascites', see: ['swelling'] },
+          { text: 'New or deepening jaundice: decompensation or alcohol-related hepatitis', see: ['skin-changes'] },
+          { text: 'Little urine with low BP: hepatorenal syndrome', see: ['urinary-symptoms'] },
+          { text: 'A hard, irregular liver, a hepatic bruit or weight loss: HCC', see: ['weight-change'] }
+        ]
+      },
+      {
         type: 'list',
         title: 'To complete the examination',
         items: [
@@ -153,6 +166,11 @@ CHE.registerExam({
           'Test the urine with a dipstick: bilirubin, urobilinogen',
           'Check the weight, temperature and stool chart'
         ]
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Summarize: signs of chronic liver disease, clues to the cause (alcohol, MASLD, viral hepatitis, hemochromatosis, Wilson disease), and whether it is decompensated (jaundice, ascites, encephalopathy, bleeding), with portal hypertension (splenomegaly, caput medusae).'
       }
     ]
   }

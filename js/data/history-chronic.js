@@ -39,7 +39,7 @@ Object.assign(CHE.frameworks, {
     id: 'presentation',
     rows: [
       { key: 'first',    letter: 'F', label: 'First symptoms',       group: '3 Fs', prompt: 'What were the first symptoms, and how long did you have them before diagnosis?' },
-      { key: 'how',      letter: 'F', label: 'Found',                group: '3 Fs', prompt: 'How was it picked up: symptoms, screening, an incidental finding or an emergency?' },
+      { key: 'how',      letter: 'F', label: 'Found',                group: '3 Fs', prompt: 'How was it first found: symptoms, screening, an incidental finding or an emergency?' },
       { key: 'admitted', letter: 'F', label: 'Facility (admission)', group: '3 Fs', prompt: 'Were you admitted to the hospital when it was first diagnosed?' }
     ]
   },

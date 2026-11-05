@@ -59,6 +59,16 @@ BRITISH = [
     (r'\b\w*(travell|(?<!g)labell|modell|cancell|signall)\w*', 'single l (traveled, labeled)'),  # not glabellar
     (r'\bprogramme\w*', 'program'),
     (r'\bgrey(?! Turner)\w*', 'gray'),  # not the Grey Turner sign (an eponym)
+    # British vocabulary, not just spelling.
+    (r'\bphysiotherap\w*', 'physical therapist, physical therapy'),
+    (r'\bcotton wool\b', 'cotton (a wisp of cotton)'),
+    (r'\btrousers\b', 'pants'),
+    (r'\btummy\b', 'belly (patient scripts) or abdomen'),
+    (r'\bsalbutamol\b', 'albuterol'),
+    (r'\bparacetamol\b', 'acetaminophen'),
+    (r'\bglandular fever\b', 'infectious mononucleosis'),
+    (r'\bcouch\b', 'bed or examination table'),
+    (r'\bA&E\b', 'ED'),
 ]
 
 # Canonical terms (CLAUDE.md). Search terms in `aka` are exempt.

@@ -176,6 +176,20 @@ CHE.registerExam({
   sections: {
     legs: [
       {
+        type: 'redflags',
+        title: 'Outside expectations: take an acute history',
+        items: [
+          { text: 'Vomiting, low BP or collapse, with hyperpigmentation or on long-term corticosteroids: adrenal crisis', see: ['nausea-vomiting', 'dizziness'] },
+          { text: 'Fever, agitation, confusion or a fast irregular pulse with signs of hyperthyroidism: thyroid storm', see: ['memory-thinking'] },
+          { text: 'Kussmaul breathing, vomiting or drowsiness with high BG: DKA', see: ['nausea-vomiting'] },
+          { text: 'Drowsiness, confusion or sweating with low BG: hypoglycemia', see: ['spells'] },
+          { text: 'Drowsiness, a low temperature or bradycardia with signs of hypothyroidism: myxedema coma', see: ['memory-thinking'] },
+          { text: 'Sudden severe headache with vision loss: pituitary apoplexy', see: ['headache', 'senses-change'] },
+          { text: 'Carpal spasm or tingling around the mouth: hypocalcemia', see: ['weakness-numbness'] },
+          { text: 'Episodes of very high BP with headache, sweating and palpitations: pheochromocytoma', see: ['headache'] }
+        ]
+      },
+      {
         type: 'list',
         title: 'To complete the examination',
         items: [
@@ -187,6 +201,11 @@ CHE.registerExam({
           'Compare with old photographs: gradual change in Cushing syndrome or acromegaly',
           'Consider examining the external genitalia (testicular volume) and the breasts (galactorrhea)'
         ]
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Summarize by hormone axis: thyroid status (hyper, eu or hypo), cortisol excess or deficiency, GH excess, glycemic control and its complications, calcium, and androgen excess. Note any goiter, eye disease or visual field defect.'
       }
     ]
   }

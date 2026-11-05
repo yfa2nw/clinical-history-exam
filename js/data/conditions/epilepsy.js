@@ -58,7 +58,7 @@ CHE.registerCondition({
       first: ['What happened at your first seizure? Did anyone see it, or record it on a phone?'],
       how: [
         {
-          text: 'How was it first picked up?',
+          text: 'How was it first found?',
           options: [
             'A convulsive seizure seen by others',
             'Episodes of staring or lost time',

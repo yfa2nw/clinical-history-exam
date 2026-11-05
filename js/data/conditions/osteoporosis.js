@@ -72,7 +72,7 @@ CHE.registerCondition({
     management: {
       lifestyle: ['Have you stopped smoking and cut down alcohol? Do you do weight-bearing and balance exercise?'],
       education: ['Do you know how to take your bisphosphonate (empty stomach, upright for 30 minutes, with water)?'],
-      allied: ['Have you seen a physiotherapist or had a falls assessment?'],
+      allied: ['Have you seen a physical therapist or had a falls assessment?'],
       medications: [
         'Do you take calcium and vitamin D?',
         'Which treatment are you on: a bisphosphonate (tablet or yearly infusion), denosumab, teriparatide or romosozumab?',

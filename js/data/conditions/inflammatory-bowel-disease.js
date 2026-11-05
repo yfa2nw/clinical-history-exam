@@ -9,7 +9,7 @@ CHE.registerCondition({
   title: 'Inflammatory bowel disease',
   aka: ['IBD', 'Crohn disease', 'Crohn\'s disease', 'ulcerative colitis', 'UC', 'colitis', 'stoma', 'ileostomy'],
   tags: ['gastrointestinal'],
-  summary: 'Pin down the type (Crohn disease or UC), the extent, and the usual flare pattern, then current activity compared with remission. Review treatment and its monitoring, steroid use, surgery and stomas, complications in and outside the gut, and colonoscopy surveillance for bowel cancer.',
+  summary: 'Pin down the type (Crohn disease or UC), the extent, and the usual flare pattern, then current activity compared with remission. Review treatment and its monitoring, corticosteroid use, surgery and stomas, complications in and outside the gut, and colonoscopy surveillance for bowel cancer.',
   ref: '',
   // Added under the rows of each chronic section's framework.
   frameworkNotes: {
@@ -91,7 +91,7 @@ CHE.registerCondition({
         'Have you had bowel surgery (a resection or colectomy)?',
         'Any surgery for a perianal abscess or fistula?',
         'Any problems with your stoma or pouch?',
-        'Any hospital admissions for flares in the past year? Did you need IV steroids?'
+        'Any hospital admissions for flares in the past year? Did you need IV corticosteroids?'
       ]
     },
     'ongoing-symptoms': {

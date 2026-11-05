@@ -50,7 +50,7 @@ CHE.registerCondition({
       first: ['What did you notice first: a tremor, slowness, stiffness, smaller handwriting or a change in walking? On which side?'],
       how: [
         {
-          text: 'How was it first picked up?',
+          text: 'How was it first found?',
           options: [
             'A tremor at rest in one hand',
             'Slowness or stiffness, often first put down to arthritis or a frozen shoulder',
@@ -69,7 +69,7 @@ CHE.registerCondition({
     management: {
       lifestyle: ['Do you exercise regularly (e.g. walking, cycling, tai chi, boxing classes)?'],
       education: ['Do you know that doses must be taken on time and never stopped suddenly?'],
-      allied: ['Do you see a physiotherapist, occupational therapist, speech therapist, dietitian or Parkinson nurse?'],
+      allied: ['Do you see a physical therapist, occupational therapist, speech therapist, dietitian or Parkinson nurse?'],
       ongoing: ['Do you have deep brain stimulation, or a pump (apomorphine, levodopa gel)? Any problems with it?'],
       medications: [
         'Which medications do you take, and at what times: levodopa (with carbidopa or benserazide), dopamine agonists (e.g. pramipexole, ropinirole, rotigotine patch), rasagiline, entacapone, amantadine?',

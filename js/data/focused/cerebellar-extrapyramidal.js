@@ -240,7 +240,7 @@ CHE.registerFocused({
               say: 'Hold your arms straight out in front of you. Now turn your palms up and close your eyes.',
               lookFor: 'Tremor in this posture, and drift of the arms.',
               findings: [
-                { text: 'Fine tremor of both hands, held out', dx: ['Essential tremor', 'Hyperthyroidism', 'Drugs (salbutamol, lithium, caffeine)'] },
+                { text: 'Fine tremor of both hands, held out', dx: ['Essential tremor', 'Hyperthyroidism', 'Drugs (albuterol, lithium, caffeine)'] },
                 { text: 'Rest tremor that returns after a few seconds of holding (re-emergent tremor)', dx: ['Parkinson disease'] },
                 { text: 'One arm drifts upward and outward', dx: ['Cerebellar lesion on that side'] }
               ]

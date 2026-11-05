@@ -24,12 +24,12 @@ CHE.registerFocused({
             {
               title: 'Introduce and consent',
               how: 'Wash your hands, introduce yourself and confirm the patient\'s identity. Explain the examination and ask for consent. Offer a chaperone.',
-              say: 'I\'d like to examine your tummy. It involves looking, pressing gently on different areas, tapping and listening. Is that all right? Would you like someone else in the room?'
+              say: 'I\'d like to examine your belly. It involves looking, pressing gently on different areas, tapping and listening. Is that all right? Would you like someone else in the room?'
             },
             {
               title: 'Ask where it hurts',
               how: 'Ask the patient to point to any pain. Examine that area last.',
-              say: 'Do you have any pain in your tummy at the moment? Can you point to where it hurts most? I\'ll leave that area until last.'
+              say: 'Do you have any pain in your belly at the moment? Can you point to where it hurts most? I\'ll leave that area until last.'
             },
             {
               title: 'Position and expose',
@@ -106,7 +106,7 @@ CHE.registerFocused({
             {
               title: 'Light palpation',
               how: 'Kneel or sit so your forearm is level with the abdomen. With the flat of your fingers, press gently in each of the nine regions, starting far from any pain and ending at it. Watch the patient\'s face, not your hand.',
-              say: 'I\'m going to press gently on your tummy. Let me know if anything is sore, and I\'ll keep watching your face too.',
+              say: 'I\'m going to press gently on your belly. Let me know if anything is sore, and I\'ll keep watching your face too.',
               lookFor: 'Tenderness (a wince or a pulled face), guarding and rigidity.',
               findings: [
                 {
@@ -280,7 +280,7 @@ CHE.registerFocused({
             {
               title: 'Fluid thrill',
               how: 'For a tensely distended abdomen: ask the patient or an assistant to press the edge of a hand firmly along the midline. Flick one flank and feel with your other hand on the opposite flank.',
-              say: 'Could you press the side of your hand down the middle of your tummy, like this?',
+              say: 'Could you press the side of your hand down the middle of your belly, like this?',
               lookFor: 'A wave you can feel arrive on the opposite side.',
               findings: [
                 { text: 'A palpable wave across the abdomen', dx: ['Large-volume ascites'] }
@@ -378,7 +378,7 @@ CHE.registerFocused({
             {
               title: 'Succussion splash',
               how: 'Place the stethoscope over the epigastrium and gently shake the patient\'s abdomen from side to side. Do this at least 3 hours after a meal.',
-              say: 'I\'m going to rock your tummy gently from side to side while I listen.',
+              say: 'I\'m going to rock your belly gently from side to side while I listen.',
               lookFor: 'A splashing sound.',
               findings: [
                 { text: 'A splash more than 3 hours after eating', dx: ['Gastric outlet obstruction'] }

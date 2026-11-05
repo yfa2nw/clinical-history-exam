@@ -28,8 +28,8 @@ CHE.registerFocused({
             },
             {
               title: 'Position and expose',
-              how: 'Lie the patient back on the couch. Expose both legs to the knees, with shoes and socks off. Put the shoes and socks aside to inspect at the end.',
-              say: 'Could you take off your shoes and socks, roll your trousers up to your knees, and lie back on the couch for me?'
+              how: 'Lie the patient back on the bed. Expose both legs to the knees, with shoes and socks off. Put the shoes and socks aside to inspect at the end.',
+              say: 'Could you take off your shoes and socks, roll your pants up to your knees, and lie back on the bed for me?'
             }
           ]
         }
@@ -112,8 +112,8 @@ CHE.registerFocused({
             },
             {
               title: 'Buerger test',
-              how: 'With the patient lying flat, raise one leg to 45° and hold it for 1 to 2 minutes, watching the sole. Note the angle at which the foot turns pale. Then sit the patient up with the legs hanging over the side of the couch.',
-              say: 'I\'m going to lift your leg and hold it up for a minute or two. Tell me if it becomes painful. Now could you sit up and hang your legs over the side of the couch?',
+              how: 'With the patient lying flat, raise one leg to 45° and hold it for 1 to 2 minutes, watching the sole. Note the angle at which the foot turns pale. Then sit the patient up with the legs hanging over the side of the bed.',
+              say: 'I\'m going to lift your leg and hold it up for a minute or two. Tell me if it becomes painful. Now could you sit up and hang your legs over the side of the bed?',
               lookFor: 'Pallor on raising the leg, then the color on hanging it down.',
               findings: [
                 { text: 'Sole turns pale when raised, especially below 20° (Buerger angle)', dx: ['Severe peripheral vascular disease'] },

@@ -1,6 +1,6 @@
 /*
  * Renal examination: signs of CKD and its causes (DM, HTN, PKD, vasculitis and SLE), volume
- * status, uremia, and kidney replacement therapy (AV fistula, PD catheter, transplant).
+ * status, uremia, and kidney replacement therapy (AV fistula, peritoneal dialysis catheter, transplant).
  * The axillae are left out; the back (renal angles, sacral edema) is examined with the
  * patient sitting forward.
  */
@@ -9,7 +9,7 @@ CHE.registerExam({
   title: 'Renal examination',
   aka: ['kidney examination', 'CKD examination', 'uremia', 'dialysis', 'AV fistula', 'kidney transplant', 'volume status'],
   tags: ['renal'],
-  summary: 'Look for the signs of CKD and its causes (DM, HTN, PKD, vasculitis, SLE), assess volume status, and look for uremia and signs of kidney replacement therapy: an AV fistula, a PD catheter or a transplant.',
+  summary: 'Look for the signs of CKD and its causes (DM, HTN, PKD, vasculitis, SLE), assess volume status, and look for uremia and signs of kidney replacement therapy: an AV fistula, a peritoneal dialysis catheter or a transplant.',
   ref: '',
   skip: ['axilla'],
   // Added under the rows of each region's framework.
@@ -29,7 +29,7 @@ CHE.registerExam({
       mental: [{ text: 'Drowsiness or confusion', dx: ['Uremic encephalopathy'] }],
       movement: [{ text: 'Twitching or jerking of the limbs', dx: ['Uremia'] }],
       surroundings: [
-        'A dialysis machine, PD bags or a fluid chart',
+        'A dialysis machine, peritoneal dialysis bags or a fluid chart',
         'A urinary catheter: note the volume and color of urine'
       ]
     },
@@ -122,8 +122,8 @@ CHE.registerExam({
           options: [
             { text: 'Curved scar in the right or left iliac fossa', dx: ['Kidney transplant'] },
             { text: 'Flank scar', dx: ['Nephrectomy'] },
-            { text: 'A catheter exiting the lower abdomen', dx: ['PD'] },
-            { text: 'Small scars from previous PD catheters', dx: ['Past PD'] }
+            { text: 'A catheter exiting the lower abdomen', dx: ['Peritoneal dialysis'] },
+            { text: 'Small scars from previous peritoneal dialysis catheters', dx: ['Past peritoneal dialysis'] }
           ]
         },
         { text: 'Distension', dx: ['Enlarged polycystic kidneys', 'Ascites'] }
@@ -140,7 +140,7 @@ CHE.registerExam({
         { text: 'Tenderness over a transplanted kidney', dx: ['Rejection', 'Pyelonephritis'] },
         { text: 'Enlarged liver', dx: ['Polycystic liver disease (PKD)'] },
         { text: 'Dull suprapubic mass that the hands cannot get below', dx: ['Urinary retention'] },
-        { text: 'Shifting dullness', dx: ['Ascites (nephrotic syndrome)', 'PD fluid'] },
+        { text: 'Shifting dullness', dx: ['Ascites (nephrotic syndrome)', 'Peritoneal dialysis fluid'] },
         { text: 'Sit the patient forward: renal angle tenderness', dx: ['Pyelonephritis'] },
         { text: 'Sit the patient forward: sacral edema', dx: ['Fluid overload', 'Nephrotic syndrome'] }
       ],
@@ -164,6 +164,19 @@ CHE.registerExam({
   sections: {
     legs: [
       {
+        type: 'redflags',
+        title: 'Outside expectations: take an acute history',
+        items: [
+          { text: 'Rapid weight gain, worsening edema or dyspnea lying flat: fluid overload', see: ['swelling'] },
+          { text: 'Much less urine than usual: AKI', see: ['urinary-symptoms'] },
+          { text: 'Weakness or palpitations: high potassium', see: ['weakness-numbness'] },
+          { text: 'Drowsiness, confusion, asterixis or a pericardial rub: uremia (may need urgent dialysis)', see: ['memory-thinking'] },
+          { text: 'Redness or tenderness over a fistula, or a lost thrill: infected or thrombosed fistula', see: ['skin-changes'] },
+          { text: 'Cloudy peritoneal dialysis fluid or abdominal pain: peritonitis', see: ['abdominal-pain'] },
+          { text: 'Fever, pain over a transplanted kidney or less urine: rejection or infection', see: ['urinary-tract-pain'] }
+        ]
+      },
+      {
         type: 'list',
         title: 'To complete the examination',
         items: [
@@ -174,6 +187,11 @@ CHE.registerExam({
           'Examine the sensation in the feet: peripheral neuropathy',
           'Consider a DRE (prostate)'
         ]
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Summarize: volume status (BP, JVP, edema, lung bases), signs of uremia, the likely cause (DM, HTN, PKD, vasculitis or SLE), and any kidney replacement therapy (fistula, peritoneal dialysis catheter, transplant).'
       }
     ]
   }

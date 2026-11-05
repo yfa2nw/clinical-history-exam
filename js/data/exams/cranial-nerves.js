@@ -222,8 +222,8 @@ CHE.registerExam({
             },
             {
               title: 'Reflex: corneal reflex',
-              how: 'Ask the patient to look up and away. Touch the edge of the cornea (not the white of the eye) lightly with a wisp of cotton wool, approaching from the side. Repeat on the other eye.',
-              say: 'Look up and away from me. I\'m going to touch your eye very lightly with this cotton wool.',
+              how: 'Ask the patient to look up and away. Touch the edge of the cornea (not the white of the eye) lightly with a wisp of cotton, approaching from the side. Repeat on the other eye.',
+              say: 'Look up and away from me. I\'m going to touch your eye very lightly with this wisp of cotton.',
               lookFor: 'Blinking of both eyes.',
               findings: [
                 { text: 'No blink in either eye when one cornea is touched', dx: ['V1 lesion on that side (afferent; early sign of an acoustic neuroma)'] },

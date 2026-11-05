@@ -32,7 +32,7 @@ CHE.registerCondition({
     'risk-factors': {
       family: ['Any family history of MS or other autoimmune disease?'],
       smoking: ['Do you smoke? (speeds up disability)'],
-      exposures: ['Have you had glandular fever in the past? How much time do you spend in the sun? (low vitamin D)'],
+      exposures: ['Have you had infectious mononucleosis (mono) in the past? How much time do you spend in the sun? (low vitamin D)'],
       diet: ['Do you take vitamin D?'],
       related: ['Any other autoimmune disease (e.g. thyroid disease, IBD)?']
     },
@@ -49,7 +49,7 @@ CHE.registerCondition({
           ]
         }
       ],
-      admitted: ['Were you admitted at the first episode? Did you have IV steroids?']
+      admitted: ['Were you admitted at the first episode? Did you have IV corticosteroids?']
     },
     investigations: {
       blood: [
@@ -64,7 +64,7 @@ CHE.registerCondition({
     management: {
       lifestyle: ['Do you exercise regularly? Have you stopped smoking? Do you take vitamin D?'],
       education: ['Do you have a plan for what to do in a relapse, and an MS nurse or helpline to call?'],
-      allied: ['Do you see a physiotherapist, occupational therapist, continence nurse, speech therapist or psychologist?'],
+      allied: ['Do you see a physical therapist, occupational therapist, continence nurse, speech therapist or psychologist?'],
       ongoing: ['Do you self-catheterize or have a catheter? Do you have a baclofen pump?'],
       medications: [
         'Which disease-modifying therapy are you on (e.g. interferon beta, glatiramer, dimethyl fumarate, teriflunomide, fingolimod, natalizumab, ocrelizumab, cladribine)? Since when?',
@@ -93,7 +93,7 @@ CHE.registerCondition({
         'Any falls, pressure sores or swallowing problems?'
       ],
       flares: ['How many relapses have you had in the past year? How were they treated, and did you fully recover?'],
-      hospitalizations: ['Any admissions for relapses or infections (e.g. UTIs, chest infections)? Did you need IV steroids or plasma exchange?']
+      hospitalizations: ['Any admissions for relapses or infections (e.g. UTIs, chest infections)? Did you need IV corticosteroids or plasma exchange?']
     },
     'ongoing-symptoms': {
       trend: [

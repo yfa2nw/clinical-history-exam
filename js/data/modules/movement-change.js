@@ -42,7 +42,7 @@ CHE.registerModule({
           { text: 'Slowly, over years', dx: ['Essential tremor', 'Parkinson disease'] },
           { text: 'Over days to weeks', dx: ['Enhanced physiologic tremor', 'Hyperthyroidism'] },
           { text: 'Suddenly, with unsteadiness', dx: ['Cerebellar disease'] },
-          { text: 'After new medications (salbutamol, lithium, valproate)', dx: ['Enhanced physiologic tremor'] },
+          { text: 'After new medications (albuterol, lithium, valproate)', dx: ['Enhanced physiologic tremor'] },
           { text: 'After new antipsychotics or metoclopramide', dx: ['Drug-induced parkinsonism'] },
           { text: 'After stopping or cutting down alcohol', dx: ['Alcohol withdrawal'] }
         ],
@@ -83,7 +83,7 @@ CHE.registerModule({
           'Any anxiety?'
         ],
         meds: [
-          'Any salbutamol, lithium, valproate or amiodarone (tremor)?',
+          'Any albuterol, lithium, valproate or amiodarone (tremor)?',
           'Any antipsychotics or metoclopramide (drug-induced parkinsonism)?',
           'Any insulin or sulfonylureas (hypoglycemia)?'
         ],
@@ -103,7 +103,7 @@ CHE.registerModule({
       differentials: [
         { name: 'Essential tremor', clues: 'Both hands, head or voice when holding a posture; family history; eased by alcohol' },
         { name: 'Parkinson disease', clues: 'Rest tremor starting in one hand, slowness, stiffness, small handwriting' },
-        { name: 'Enhanced physiologic tremor', clues: 'Fine tremor of both hands; anxiety, caffeine, salbutamol, lithium, valproate' },
+        { name: 'Enhanced physiologic tremor', clues: 'Fine tremor of both hands; anxiety, caffeine, albuterol, lithium, valproate' },
         { name: 'Hyperthyroidism', clues: 'Fine tremor, heat intolerance, palpitations, weight loss' },
         { name: 'Hypoglycemia', clues: 'Shaking with sweating, hunger, confusion; insulin or sulfonylureas' },
         { name: 'Alcohol withdrawal', clues: 'Tremor, sweating and agitation 6–24 h after the last drink' },
