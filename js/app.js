@@ -671,8 +671,10 @@
   function renderGuide(modeId, selected, sectionId) {
     const mode = skeleton(modeId);
     const active = resolveActive(modeId, selected);
-    // A focused examination brings its own pages; otherwise the skeleton's sections.
-    const sections = mode.fromEntry && active.length ? active[0].mod.sections : mode.sections;
+    // A focused examination, or a system examination that doesn't fit the head-to-toe
+    // skeleton (e.g. neurologic), brings its own pages (a list); otherwise the skeleton's sections.
+    const own = active.length && Array.isArray(active[0].mod.sections) ? active[0].mod.sections : null;
+    const sections = own || mode.sections;
     const section = currentSection(sections, sectionId);
 
     let shell = app.querySelector('.history');
@@ -903,7 +905,7 @@
   const contentText = JSON.stringify([CHE.history, CHE.exam, CHE.modules, CHE.conditions, CHE.exams, CHE.focused, CHE.frameworks]);
   const missing = {};
   // Names with two capitals that are not abbreviations (keep in step with validate.py).
-  const notAbbreviations = { McBurney: true };
+  const notAbbreviations = { McBurney: true, II: true, III: true, VI: true, VII: true, VIII: true, IX: true, XI: true, XII: true };
   // A trailing "-1" style suffix is part of the abbreviation (e.g. GLP-1).
   (contentText.match(/\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b/g) || []).forEach(function (token) {
     if (notAbbreviations[token]) return;

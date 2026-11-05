@@ -28,8 +28,9 @@ BLOCK_TYPES = {'list', 'groups', 'mnemonic', 'framework', 'callout', 'redflags',
 
 # Same pattern as the check in js/app.js: two or more capitals, optional "-1" suffix (GLP-1).
 ABBR_RE = re.compile(r'\b[A-Za-z]*[A-Z][A-Za-z0-9/]*[A-Z][A-Za-z0-9]*(?:-\d+)?\b')
-# Names with two capitals that are not abbreviations (keep in step with js/app.js).
-NOT_ABBREVIATIONS = {'McBurney'}
+# Names with two capitals that are not abbreviations, and Roman numerals (cranial nerves).
+ROMAN_NUMERALS = {'II', 'III', 'IV', 'VI', 'VII', 'VIII', 'IX', 'XI', 'XII'}
+NOT_ABBREVIATIONS = {'McBurney'} | (ROMAN_NUMERALS - {'IV'})  # IV is also "intravenous" in the glossary
 
 # Keys that hold ids or search terms rather than readable content.
 NON_CONTENT_KEYS = {'id', 'see', 'related', 'tags', 'framework', 'skip', 'key', 'letter'}
@@ -55,7 +56,7 @@ BRITISH = [
     (r'\b(real|recogn|organ|minim|maxim|character|local|general|hospital|immobil|stabil|'
      r'priorit|summar|categor|emphas|special|util|standard|visual|normal|sensit|catheter)'
      r'is(e|ed|es|ing|ation|ations)\b', '-ize'),
-    (r'\b\w*(travell|labell|modell|cancell|signall)\w*', 'single l (traveled, labeled)'),
+    (r'\b\w*(travell|(?<!g)labell|modell|cancell|signall)\w*', 'single l (traveled, labeled)'),  # not glabellar
     (r'\bprogramme\w*', 'program'),
     (r'\bgrey(?! Turner)\w*', 'gray'),  # not the Grey Turner sign (an eponym)
 ]
@@ -388,27 +389,44 @@ def check_focused(report, data):
         for field in ('title', 'summary', 'tags', 'sections'):
             if not exam.get(field):
                 report.error('Focused examinations', f'{fid}: missing {field}')
-        seen = set()
-        for sec in exam.get('sections') or []:
-            sid = sec.get('id')
-            if sid in seen:
-                report.error('Focused examinations', f'{fid}: duplicate section id "{sid}"')
-            seen.add(sid)
-            for field in ('id', 'title', 'summary', 'core'):
-                if not sec.get(field):
-                    report.error('Focused examinations', f'{fid} ({sid}): section missing {field}')
-            for b in sec.get('core') or []:
-                if b.get('type') not in BLOCK_TYPES:
-                    report.error('Focused examinations', f'{fid} ({sid}): unknown block type "{b.get("type")}"')
-                if b.get('type') == 'steps':
-                    for step in b.get('items') or []:
-                        for field in ('title', 'how'):
-                            if not step.get(field):
-                                report.error('Focused examinations', f'{fid} ({sid}): a step is missing {field}')
-                        check_hormones(report, f'{fid} ({sid}: {step.get("title")})', step.get('findings'))
+        check_pages(report, 'Focused examinations', fid, exam.get('sections') or [])
         for ref in all_see(exam):
             if ref not in mods:
                 report.error('Links', f'{fid}: unknown presenting complaint "{ref}"')
+
+
+def check_pages(report, check, eid, pages):
+    """An examination's own pages: [{ id, title, summary, core }], with steps blocks."""
+    seen = set()
+    for sec in pages:
+        sid = sec.get('id')
+        if sid in seen:
+            report.error(check, f'{eid}: duplicate section id "{sid}"')
+        seen.add(sid)
+        for field in ('id', 'title', 'summary', 'core'):
+            if not sec.get(field):
+                report.error(check, f'{eid} ({sid}): section missing {field}')
+        for b in sec.get('core') or []:
+            if b.get('type') not in BLOCK_TYPES:
+                report.error(check, f'{eid} ({sid}): unknown block type "{b.get("type")}"')
+            if b.get('type') == 'steps':
+                for step in b.get('items') or []:
+                    for field in ('title', 'how'):
+                        if not step.get(field):
+                            report.error(check, f'{eid} ({sid}): a step is missing {field}')
+                    check_hormones(report, f'{eid} ({sid}: {step.get("title")})', step.get('findings'))
+
+
+def page_headings(exam):
+    """(where, heading) for an examination with its own pages."""
+    heads = [('title', exam['title'])]
+    for sec in exam.get('sections') or []:
+        heads.append((f'{sec.get("id")} title', sec.get('title') or ''))
+        for b in sec.get('core') or []:
+            heads += [(f'{sec.get("id")} heading', b.get('title') or '')]
+            heads += [(f'{sec.get("id")} step', st.get('title') or '') for st in b.get('items') or []
+                      if b.get('type') == 'steps']
+    return heads
 
 
 def check_exams(report, data):
@@ -434,7 +452,10 @@ def check_exams(report, data):
                 report.error('Examinations', f'{eid}: missing {field}')
         if not exam.get('frameworkNotes') and not exam.get('sections'):
             report.error('Examinations', f'{eid}: adds nothing (no frameworkNotes or sections)')
-        for sid, blocks in (exam.get('sections') or {}).items():
+        # An examination that doesn't fit the head-to-toe skeleton brings its own pages (a list).
+        if isinstance(exam.get('sections'), list):
+            check_pages(report, 'Examinations', eid, exam['sections'])
+        for sid, blocks in (exam.get('sections') or {}).items() if isinstance(exam.get('sections'), dict) else []:
             if sid not in section_ids:
                 report.error('Examinations', f'{eid}: "{sid}" is not an examination section')
             for b in blocks:
@@ -539,25 +560,20 @@ def check_abbreviations(report, data):
         for src in [mod] + list(mod.get('parts') or []):
             heads += [('callout', c.get('title', '')) for c in src.get('callouts') or []]
         for where, h in heads:
-            for tok in ABBR_RE.findall(h):
+            for tok in [t for t in ABBR_RE.findall(h) if t not in NOT_ABBREVIATIONS | ROMAN_NUMERALS]:
                 report.warn('Headings', f'{mid} {where}: "{h}" uses the abbreviation {tok}')
-    for fid, exam in data['focused'].items():
-        heads = [('title', exam['title'])]
-        for sec in exam.get('sections') or []:
-            heads.append((f'{sec.get("id")} title', sec.get('title') or ''))
-            for b in sec.get('core') or []:
-                heads += [(f'{sec.get("id")} heading', b.get('title') or '')]
-                heads += [(f'{sec.get("id")} step', st.get('title') or '') for st in b.get('items') or []
-                          if b.get('type') == 'steps']
-        for where, h in heads:
-            for tok in ABBR_RE.findall(h):
+    paged = list(data['focused'].items()) + [(k, v) for k, v in data['exams'].items() if isinstance(v.get('sections'), list)]
+    for fid, exam in paged:
+        for where, h in page_headings(exam):
+            for tok in [t for t in ABBR_RE.findall(h) if t not in NOT_ABBREVIATIONS | ROMAN_NUMERALS]:
                 report.warn('Headings', f'{fid} {where}: "{h}" uses the abbreviation {tok}')
-    for cid, cond in list(data['conditions'].items()) + list(data['exams'].items()):
+    keyed = [(k, v) for k, v in data['exams'].items() if not isinstance(v.get('sections'), list)]
+    for cid, cond in list(data['conditions'].items()) + keyed:
         heads = [('title', cond['title'])] + [
             (f'{sid} heading', t) for sid, blocks in (cond.get('sections') or {}).items() for b in blocks
             for t in [b.get('title') or ''] + [g.get('title') or '' for g in b.get('groups') or []] if t]
         for where, h in heads:
-            for tok in ABBR_RE.findall(h):
+            for tok in [t for t in ABBR_RE.findall(h) if t not in NOT_ABBREVIATIONS | ROMAN_NUMERALS]:
                 report.warn('Headings', f'{cid} {where}: "{h}" uses the abbreviation {tok}')
 
 

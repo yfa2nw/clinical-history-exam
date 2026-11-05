@@ -9,7 +9,6 @@ CHE.exam.focused = {
   title: 'Focused Examination',
   description: 'One body part examined in depth: the technique, what to say to the patient, what to look for and what it means. Choose an examination from the library.',
   // The chosen examination's own pages replace these.
-  fromEntry: true,
   sections: [
     {
       id: 'choose',
