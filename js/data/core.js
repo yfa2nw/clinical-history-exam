@@ -119,6 +119,8 @@ CHE.registerExam = function (exam) {
  *     lookFor   what to watch or feel for
  *     findings  what you might find, each with `dx` chips (what it means) and, where a
  *               hormone drives it, `hormones: ['↑ Thyroid hormone']`
+ *     findingsLabel  heading for the findings list when it is not findings (default
+ *               "What it means"), e.g. "Grades" for a scale
  *
  * The focused library is "choose one".
  */

@@ -1,0 +1,6 @@
+# Keep text files with LF line endings in the repository and the working tree on every
+# platform, so commits don't warn about LF/CRLF conversion and diffs stay clean.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary

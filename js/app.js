@@ -34,6 +34,17 @@
   // Features start switched off; the user picks the ones the patient has.
   const ui = { query: '', tag: 'all', lastMode: null, shownParts: {} };
 
+  // Practice mode (examinations): tick off steps, time the station, hide the details to
+  // test recall. Ticks are saved per examination in this browser.
+  const PRACTICE_KEY = 'che.practice';
+  const practice = {
+    on: false,
+    hideDetails: false,
+    timer: { running: false, startedAt: 0, elapsed: 0, interval: null },
+    key: null,         // storage key for the current examination's ticks
+    bySection: {}      // section id -> [step id] for the current examination
+  };
+
   /* ---------- Storage (fails soft in private mode / blocked storage) ---------- */
 
   const store = {
@@ -320,7 +331,7 @@
             part('How', '<p>' + esc(s.how) + '</p>') +
             (s.say ? part('Say', '<blockquote class="step__say">' + esc(s.say) + '</blockquote>') : '') +
             (s.lookFor ? part('Look for', '<p>' + esc(s.lookFor) + '</p>') : '') +
-            (s.findings ? part('What it means', list(s.findings, 'options', mod)) : '') +
+            (s.findings ? part(esc(s.findingsLabel || 'What it means'), list(s.findings, 'options', mod)) : '') +
             '</li>';
         }).join('') + '</ol></div>';
     }
@@ -590,7 +601,7 @@
         esc(text.emptyBar || 'Showing the ' + text.core.toLowerCase() + '.') + '</div>';
     }
     return '<div class="active-bar">' +
-      '<span class="active-bar__label">Composing:</span>' +
+      '<span class="active-bar__label">' + (MODES[modeId] === 'exam' ? 'Examining:' : 'Composing:') + '</span>' +
       active.map(function (e) {
         return '<span class="chip chip--active">' + esc(e.mod.title) +
           '<button type="button" class="chip__x" data-action="remove" data-id="' + esc(e.mod.id) + '" aria-label="Remove ' +
@@ -598,6 +609,103 @@
       }).join('') +
       '<button type="button" class="text-btn" data-action="clear">' + esc(text.clear) + '</button>' +
       '</div>';
+  }
+
+  /* ---------- Practice mode ---------- */
+
+  // Every step a practice can tick, per section: framework rows and focused-exam steps,
+  // as "<section>/<block index>/<item index>". Skipped sections and frameworks have none.
+  function practiceItems(sections, active) {
+    const bySection = {};
+    sections.forEach(function (s) {
+      const ids = bySection[s.id] = [];
+      if (isSkipped(s.id, active)) return;
+      (s.core || []).forEach(function (b, bi) {
+        let n = 0;
+        if (b.type === 'framework' && !isSkipped(b.id, active)) n = ((CHE.frameworks[b.id] || {}).rows || []).length;
+        if (b.type === 'steps') n = (b.items || []).length;
+        for (let i = 0; i < n; i++) ids.push(s.id + '/' + bi + '/' + i);
+      });
+    });
+    return bySection;
+  }
+
+  function practiceDone() {
+    return store.get(practice.key, []);
+  }
+
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function timerElapsed() {
+    const t = practice.timer;
+    return t.elapsed + (t.running ? Date.now() - t.startedAt : 0);
+  }
+
+  function updateTimer() {
+    const time = document.getElementById('practice-time');
+    const btn = document.getElementById('practice-timer-btn');
+    if (time) time.textContent = formatTime(timerElapsed());
+    if (btn) btn.textContent = practice.timer.running ? 'Pause' : (timerElapsed() ? 'Resume' : 'Start timer');
+  }
+
+  function renderPracticeBar(modeId) {
+    if (MODES[modeId] !== 'exam') return '';
+    if (!practice.on) {
+      return '<div class="practice-bar"><button type="button" class="practice-btn" data-action="practice">Practice mode</button>' +
+        '<span class="practice-bar__hint">Tick off steps, time yourself and test your recall</span></div>';
+    }
+    return '<div class="practice-bar is-on">' +
+      '<span class="practice-bar__label">Practice</span>' +
+      '<span class="practice-bar__progress" id="practice-progress"></span>' +
+      '<span class="practice-bar__timer"><span class="practice-bar__time" id="practice-time">00:00</span>' +
+        '<button type="button" class="practice-btn" id="practice-timer-btn" data-action="timer"></button>' +
+        '<button type="button" class="text-btn" data-action="timer-reset">Reset</button></span>' +
+      // The actions wrap together, so no control ends up alone on a line.
+      '<span class="practice-bar__actions">' +
+        '<button type="button" class="practice-btn" id="practice-hide-btn" data-action="hide-details" aria-pressed="' + practice.hideDetails + '">' +
+          (practice.hideDetails ? 'Show details' : 'Hide details') + '</button>' +
+        '<button type="button" class="text-btn" data-action="practice-reset">Clear ticks</button>' +
+        '<button type="button" class="text-btn" data-action="practice">Exit practice</button>' +
+      '</span>' +
+      '</div>';
+  }
+
+  // After a page renders: add a tick box to each step, and show progress.
+  function applyPractice(flow, section) {
+    flow.classList.toggle('is-practice', practice.on);
+    flow.classList.toggle('hide-details', practice.on && practice.hideDetails);
+    if (!practice.on) return;
+    const done = practiceDone();
+    flow.querySelectorAll('.stage [data-block]').forEach(function (block) {
+      block.querySelectorAll('.framework__row, .step').forEach(function (row, i) {
+        const id = section.id + '/' + block.dataset.block + '/' + i;
+        const on = done.indexOf(id) !== -1;
+        row.classList.toggle('is-done', on);
+        row.insertAdjacentHTML('afterbegin', '<button type="button" class="practice-check" data-action="check" data-pid="' + esc(id) + '"' +
+          ' aria-pressed="' + on + '" aria-label="Mark as done">✓</button>');
+      });
+    });
+    updatePracticeStatus(flow);
+    updateTimer();
+  }
+
+  function updatePracticeStatus(flow) {
+    const done = practiceDone();
+    let total = 0;
+    let count = 0;
+    Object.keys(practice.bySection).forEach(function (sid) {
+      const ids = practice.bySection[sid];
+      const n = ids.filter(function (id) { return done.indexOf(id) !== -1; }).length;
+      total += ids.length;
+      count += n;
+      const tab = flow.querySelector('.stage-nav button[data-section="' + sid + '"]');
+      if (tab) tab.classList.toggle('is-complete', ids.length > 0 && n === ids.length);
+    });
+    const progress = document.getElementById('practice-progress');
+    if (progress) progress.textContent = count + ' of ' + total + ' steps done';
   }
 
   // Page tabs: one per section, the current one highlighted.
@@ -644,7 +752,8 @@
   function renderStageBody(section, active, modeId) {
     return (section.core && section.core.length
         ? '<details class="core" data-key="core-' + esc(section.id) + '" open><summary>' + esc(MODE_TEXT[modeId].core) + '</summary>' +
-          section.core.map(function (b) { return renderBlock(b, active); }).join('') +
+          // Each block keeps its index, so practice mode can give every step a stable id.
+          section.core.map(function (b, i) { return '<div data-block="' + i + '">' + renderBlock(b, active) + '</div>'; }).join('') +
           '</details>'
         : '') +
       renderStageSlots(section, active, modeId) +
@@ -716,7 +825,7 @@
 
     flow.innerHTML =
       // One sticky header: the complaint bar and the page tabs stay together.
-      '<div class="flow-head">' + renderActiveBar(active, mode.id) + renderStageNav(sections, section, active) + '</div>' +
+      '<div class="flow-head">' + renderActiveBar(active, mode.id) + renderPracticeBar(mode.id) + renderStageNav(sections, section, active) + '</div>' +
       renderStage(section, sections.indexOf(section), active, mode.id) +
       renderPager(sections, section, active) +
       renderDifferentials(active);
@@ -724,6 +833,11 @@
     flow.querySelectorAll('details[data-key]').forEach(function (d) {
       if (d.dataset.key in openState) d.open = openState[d.dataset.key];
     });
+
+    // Practice mode: ticks are stored per examination (or for the general steps alone).
+    practice.key = PRACTICE_KEY + '.' + mode.id + '.' + (active[0] ? active[0].mod.id : 'general');
+    practice.bySection = MODES[mode.id] === 'exam' ? practiceItems(sections, active) : {};
+    applyPractice(flow, section);
 
     // Scroll the tab strip sideways so the current page's tab is visible. Re-run once web
     // fonts load, since they change the tab widths.
@@ -810,6 +924,54 @@
       case 'page':
         goToSection(el.dataset.section);
         break;
+      case 'practice':
+        practice.on = !practice.on;
+        store.set(PRACTICE_KEY + '.on', practice.on);
+        route();
+        break;
+      case 'check': {
+        const done = practiceDone();
+        const pid = el.dataset.pid;
+        const i = done.indexOf(pid);
+        if (i === -1) done.push(pid); else done.splice(i, 1);
+        store.set(practice.key, done);
+        el.setAttribute('aria-pressed', i === -1);
+        el.parentNode.classList.toggle('is-done', i === -1);
+        updatePracticeStatus(app.querySelector('.flow'));
+        break;
+      }
+      case 'timer': {
+        const t = practice.timer;
+        if (t.running) {
+          t.elapsed += Date.now() - t.startedAt;
+          t.running = false;
+          clearInterval(t.interval);
+        } else {
+          t.startedAt = Date.now();
+          t.running = true;
+          t.interval = setInterval(updateTimer, 500);
+        }
+        updateTimer();
+        break;
+      }
+      case 'timer-reset':
+        clearInterval(practice.timer.interval);
+        practice.timer = { running: false, startedAt: 0, elapsed: 0, interval: null };
+        updateTimer();
+        break;
+      case 'hide-details':
+        practice.hideDetails = !practice.hideDetails;
+        store.set(PRACTICE_KEY + '.hide', practice.hideDetails);
+        app.querySelector('.flow').classList.toggle('hide-details', practice.hideDetails);
+        el.setAttribute('aria-pressed', practice.hideDetails);
+        el.textContent = practice.hideDetails ? 'Show details' : 'Hide details';
+        break;
+      case 'practice-reset':
+        if (window.confirm('Clear all ticks for this examination?')) {
+          store.set(practice.key, []);
+          route();
+        }
+        break;
       case 'dx': {
         const row = document.getElementById(el.dataset.target);
         if (!row) break;
@@ -870,6 +1032,9 @@
   });
 
   /* ---------- Theme ---------- */
+
+  practice.on = store.get(PRACTICE_KEY + '.on', false);
+  practice.hideDetails = store.get(PRACTICE_KEY + '.hide', false);
 
   const savedTheme = store.get(THEME_KEY, null);
   if (savedTheme) document.documentElement.dataset.theme = savedTheme;

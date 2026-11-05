@@ -337,7 +337,7 @@ CHE.registerModule({
       callouts: [
         {
           variant: 'note',
-          title: 'Scoring the IPSS',
+          title: 'Scoring',
           text: 'Each item is scored 0–5 (not at all to almost always; nocturia 0 to 5 or more times), giving a total of 0–35: mild 0–7, moderate 8–19, severe 20–35. It was designed for men with BPH, but its items are a useful structure for LUTS in anyone. Hesitancy and terminal dribbling are not scored, so ask about them separately.'
         }
       ],

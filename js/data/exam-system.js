@@ -122,7 +122,7 @@ Object.assign(CHE.frameworks, {
 CHE.exam.system = {
   id: 'system',
   title: 'System Examination',
-  description: 'For a system examination, from the end of the bed to the feet. Choose an examination from the library to add what to look for at each step.',
+  description: 'A full examination of one system, usually from the end of the bed to the feet. Choose an examination from the library to add what to look for at each step.',
   sections: [
     {
       id: 'general-inspection',

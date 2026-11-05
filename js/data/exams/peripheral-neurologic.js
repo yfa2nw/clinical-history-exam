@@ -159,6 +159,7 @@ CHE.registerExam({
               how: 'Show the patient each movement. Fix the joint above with one hand and resist with the other. Compare each side in turn.',
               say: 'I\'m going to test the strength of different muscles. Push or pull as hard as you can, and don\'t let me move you.',
               lookFor: 'Which movements are weak, on which side, and in which pattern.',
+              findingsLabel: 'Movements (what to say, root and nerve)',
               findings: [
                 { text: 'Shoulder abduction: "Arms out like chicken wings. Don\'t let me push them down." (C5, axillary nerve)' },
                 { text: 'Elbow flexion: "Bend your elbow and pull me toward you." (C5 to C6, musculocutaneous nerve)' },
@@ -173,6 +174,7 @@ CHE.registerExam({
             {
               title: 'Grade the power',
               how: 'Grade each movement from 0 to 5.',
+              findingsLabel: 'Grades',
               findings: [
                 '5: normal power',
                 '4: moves against some resistance, but weaker than normal',
@@ -401,6 +403,7 @@ CHE.registerExam({
               how: 'Show the patient each movement. Fix the joint above with one hand and resist with the other. Compare each side in turn, and grade from 0 to 5 as for the arms.',
               say: 'Now the legs. Push or pull as hard as you can, and don\'t let me move you.',
               lookFor: 'Which movements are weak, on which side, and in which pattern.',
+              findingsLabel: 'Movements (what to say, root and nerve)',
               findings: [
                 { text: 'Hip flexion: "Lift your leg off the bed. Don\'t let me push it down." (L1 to L2, femoral nerve)' },
                 { text: 'Hip extension: "Push your leg down into the bed." (L5 to S1, inferior gluteal nerve)' },
